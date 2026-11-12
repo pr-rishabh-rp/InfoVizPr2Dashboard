@@ -1,9 +1,0 @@
-genre,n_paid_games,median_price_usd,mean_price_usd,owners_sum,n_mixed,squares_mixed,n_mostly_positive,squares_mostly_positive,n_very_positive,squares_very_positive,n_overwhelmingly_positive,squares_overwhelmingly_positive
-Strategy,25,35.0,36.3904,290000000,0,0,4,3,11,9,10,8
-Massively Multiplayer,13,34.99,30.91307692307693,262500000,2,3,5,8,6,9,0,0
-Action,103,29.99,30.62106796116504,1692500000,6,1,13,2,45,9,39,8
-Adventure,62,29.99,34.87709677419353,1035000000,3,1,8,3,29,9,22,7
-RPG,45,29.99,33.32333333333333,980000000,2,1,6,3,21,9,16,7
-Simulation,30,27.49,30.723666666666666,405000000,3,2,1,1,14,9,12,8
-Indie,48,19.99,23.49020833333333,767500000,0,0,2,1,20,8,26,11
-Casual,10,12.49,18.491000000000003,172500000,1,2,0,0,2,4,7,14
