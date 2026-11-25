@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Steam Paid Games Dashboard</title>
+<title>Pay More, Get Less?</title>
 <style>
-/* Layout C from the proposal: title + features bar, then Q1 | Q2 | (Q3 bar over Q3 waffle). */
+/* Layout C from the proposal, revised: title + features bar, then the story read left to right, Q1 | Q2 | Q3, then the verdict. */
 :root{
   --bg:#f3f4f6; --surface:#ffffff; --ink:#111827; --ink2:#4b5563; --muted:#5f6673; --line:#e5e7eb;
   --accent:#C2500A; --ctx:#c3c8d0;
@@ -21,11 +21,12 @@
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.4}
 .page{max-width:1560px;margin:0 auto;padding:14px 20px 28px}
-/* Title: BST Bazaine Bold, drawn as outlines. Two phrase groups, so a wrap falls after "games:" first. */
-h1.title{margin:0 0 3px;font-size:clamp(20px,1.42vw,24px);line-height:1;display:flex;flex-wrap:wrap;gap:.08em .25em;color:var(--ink)}
+/* Title: BST Bazaine Bold, drawn as outlines. Two phrase groups, so a wrap falls after "More," first. */
+h1.title{margin:0 0 6px;font-size:clamp(30px,2.6vw,40px);line-height:1;display:flex;flex-wrap:wrap;gap:.08em .25em;color:var(--ink)}
 h1.title .tg{display:flex;flex-wrap:wrap;gap:.08em .25em}
 h1.title svg{height:1em;flex:none;display:block;fill:currentColor}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.hook{margin:0;font-size:15px;line-height:1.35;color:var(--ink);font-weight:600;max-width:62ch;text-wrap:balance}
 .sub{margin:3px 0 0;color:var(--ink2);font-size:12.5px}
 .top{display:flex;flex-wrap:wrap;gap:10px 28px;align-items:flex-end;justify-content:space-between}
 .titles{flex:1 1 420px;min-width:0}
@@ -36,6 +37,8 @@ h1.title svg{height:1em;flex:none;display:block;fill:currentColor}
 .tier{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:12.5px;color:var(--ink);background:var(--surface);
   border:1px solid #cfd4dc;border-radius:999px;padding:4px 10px 4px 7px;cursor:pointer}
 .tier .sw{width:13px;height:13px;border-radius:3px;border:1.5px solid transparent;flex:none}
+.tier .shp{width:13px;height:13px;flex:none;display:block;fill:var(--ink2)}
+.tier[aria-pressed="false"] .shp{fill:none;stroke:#9aa1ad;stroke-width:1.5}
 .tier .ct{color:var(--muted);font-variant-numeric:tabular-nums}
 .tier[aria-pressed="false"]{background:transparent;color:var(--muted)}
 .tier[aria-pressed="false"] .lb{text-decoration:line-through}
@@ -48,30 +51,25 @@ button:focus-visible,summary:focus-visible,a:focus-visible{outline:2.5px solid v
 .status.on{border-left-color:var(--accent);color:var(--ink)}
 .status b{color:var(--ink)}
 
-.grid{display:grid;grid-template-columns:1.05fr .95fr 1.1fr;grid-template-rows:auto auto;gap:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:11px 13px 8px;display:flex;flex-direction:column;min-width:0}
-#p1{grid-column:1;grid-row:1 / span 2}
-#p2{grid-column:2;grid-row:1 / span 2}
-#p3{grid-column:3;grid-row:1}
-#p4{grid-column:3;grid-row:2}
 .q{margin:0;font-size:11.5px;color:var(--muted);display:flex;gap:7px;align-items:baseline}
 .qn{font-weight:700;color:var(--ink);font-size:11px;border:1px solid #9aa1ad;border-radius:4px;padding:0 5px;flex:none}
 h2{font-size:15px;line-height:1.3;margin:4px 0 2px;font-weight:650;text-wrap:balance;min-height:2.6em}
 .desc{margin:0;font-size:12px;color:var(--ink2)}
 .selnote{margin:1px 0 4px;font-size:12px;font-weight:600;color:var(--ink);height:2.8em;overflow:hidden}
-#p3 .selnote,#p4 .selnote{height:1.4em;white-space:nowrap;text-overflow:ellipsis}
-.chart{position:relative;flex:1 1 auto;min-height:400px}
-#c3{flex:0 0 auto;height:222px;min-height:0}
-#c4{flex:0 0 auto;height:202px;min-height:0}
+.chart{position:relative;flex:1 1 auto;min-height:440px}
 .chart svg{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible}
 svg text{font-family:var(--mono);fill:var(--ink2);font-size:10.5px}
-svg .ink text,svg text.glabel,svg text.val{font-family:var(--font);font-size:11.5px}
+svg .ink text,svg text.glabel,svg text.val,svg text.seg{font-family:var(--font);font-size:11.5px}
+svg text.glabel{font-size:12.5px}
+svg text.seg{font-weight:650;font-variant-numeric:tabular-nums}
 svg .tick text,svg .n text,svg .scale text{font-variant-numeric:tabular-nums}
 svg [tabindex]{outline:none;cursor:pointer}
 svg .fr{opacity:0;fill:none;stroke:var(--accent);stroke-width:2.5;pointer-events:none}
 svg [tabindex]:focus-visible > .fr{opacity:1}
-svg .dot,svg .sq,svg .bar{transition:fill .15s,opacity .15s}
-@media (prefers-reduced-motion:reduce){svg .dot,svg .sq,svg .bar{transition:none}}
+svg .dot,svg .seg-r{transition:fill .15s,opacity .15s}
+@media (prefers-reduced-motion:reduce){svg .dot,svg .seg-r{transition:none}}
 
 details.tbl{margin-top:4px;font-size:12px}
 details.tbl summary{cursor:pointer;color:var(--ink2);width:max-content;padding:2px 2px}
@@ -81,6 +79,11 @@ th,td{text-align:left;padding:3px 8px;border-bottom:1px solid var(--line);vertic
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .tblwrap thead th{position:sticky;top:0;background:#f7f8fa;font-weight:600}
 
+.verdict{margin-top:12px;padding:14px 18px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--t4);border-radius:8px;display:grid;grid-template-columns:auto 1fr 1fr;gap:4px 28px;align-items:baseline}
+.verdict h2{margin:0;min-height:0;font-size:16px;white-space:nowrap}
+.verdict p{margin:0;font-size:13.5px;line-height:1.45;color:var(--ink)}
+.verdict p.why{color:var(--ink2)}
+.verdict b{color:var(--ink)}
 .notes{display:grid;grid-template-columns:1fr 1.1fr 1.3fr;gap:12px 28px;margin-top:16px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:8px;font-size:12.5px;color:var(--ink2)}
 .notes h3{font-size:13px;margin:0 0 6px;color:var(--ink)}
 .notes ul{margin:0;padding-left:17px}
@@ -104,17 +107,16 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 
 @media (max-width:1180px){
   .grid{grid-template-columns:1fr 1fr}
-  #p1{grid-column:1;grid-row:1}
-  #p2{grid-column:2;grid-row:1}
-  #p3{grid-column:1;grid-row:2}
-  #p4{grid-column:2;grid-row:2}
-  .chart{min-height:380px}
+  #p3{grid-column:1 / span 2}
+  #p3 .chart{min-height:300px}
+  .chart{min-height:400px}
+  .verdict{grid-template-columns:1fr}
   .notes{grid-template-columns:1fr 1fr}
 }
 @media (max-width:760px){
   .page{padding:12px 16px 24px}
   .grid{grid-template-columns:1fr}
-  #p1,#p2,#p3,#p4{grid-column:1;grid-row:auto}
+  #p1,#p2,#p3{grid-column:1;grid-row:auto}
   .chart{min-height:340px}
   .notes{grid-template-columns:1fr}
   .hint{display:block;margin-left:0}
@@ -133,13 +135,18 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 <div class="page">
   <header class="top">
     <div class="titles">
-      <h1 class="title"><span class="vh">Steam’s most-owned paid games: price, players and reviews</span><span class="tg"><svg viewBox="0 -810 4391 1000" style="width:4.391em" aria-hidden="true" focusable="false"><path d="M521 -405 374 -412C289 -416 233 -456 233 -516C233 -581 294 -616 376 -616C477 -616 542 -576 542 -467H722C701 -632 583 -710 376 -710C194 -710 59 -628 59 -497C59 -374 153 -317 294 -309L445 -300C525 -295 566 -253 566 -193C566 -125 501 -84 409 -84C305 -84 225 -134 225 -235H45C53 -69 211 10 409 10C604 10 742 -85 742 -215C742 -340 658 -399 521 -405ZM984 0H1164V-86H1104C1054 -86 1036 -109 1036 -153V-440H1164V-526H1036V-670H870V-526H779V-440H870V-114C870 -37 912 0 984 0ZM1506 10C1658 10 1783 -70 1809 -196H1639C1626 -125 1583 -76 1506 -76C1413 -76 1362 -145 1357 -245H1810C1815 -439 1666 -536 1507 -536C1353 -536 1189 -445 1189 -263C1189 -96 1325 10 1506 10ZM1643 -331H1364C1380 -404 1430 -450 1506 -450C1588 -450 1635 -404 1643 -331ZM2111 10C2171 10 2232 -7 2280 -44V0H2446V-334C2446 -478 2316 -536 2176 -536C2030 -536 1902 -474 1890 -354H2060C2071 -419 2117 -450 2178 -450C2236 -450 2277 -432 2277 -389C2277 -345 2230 -332 2102 -325C1988 -319 1875 -294 1875 -162C1875 -48 1970 10 2111 10ZM2141 -75C2082 -75 2043 -105 2043 -158C2043 -209 2072 -238 2142 -243C2194 -247 2249 -255 2280 -276V-155C2255 -111 2207 -75 2141 -75ZM2563 0H2729V-370C2753 -417 2797 -450 2839 -450C2912 -450 2935 -402 2935 -313V0H3101V-370C3125 -417 3169 -450 3211 -450C3284 -450 3307 -402 3307 -313V0H3473V-343C3473 -414 3444 -463 3408 -491C3373 -518 3317 -536 3256 -536C3185 -536 3127 -517 3066 -462C3057 -474 3048 -483 3038 -491C3002 -519 2946 -536 2883 -536C2829 -536 2775 -521 2729 -488V-526H2563ZM3569 -427H3553V-355H3569C3649 -355 3731 -385 3731 -505V-700H3561V-532H3634C3648 -532 3656 -525 3656 -507C3656 -465 3634 -427 3569 -427ZM4076 10C4244 10 4356 -51 4356 -160C4356 -263 4265 -302 4164 -306L4053 -310C4000 -312 3962 -335 3962 -380C3962 -429 4011 -450 4064 -450C4133 -450 4174 -410 4174 -354H4344C4335 -470 4201 -536 4064 -536C3904 -536 3794 -473 3794 -372C3794 -270 3883 -230 3980 -225L4105 -218C4156 -215 4188 -192 4188 -147C4188 -97 4144 -76 4080 -76C4004 -76 3961 -118 3961 -176H3791C3800 -56 3939 10 4076 10Z"/></svg><svg viewBox="0 -810 6592 1000" style="width:6.592em" aria-hidden="true" focusable="false"><path d="M65 0H231V-370C255 -417 299 -450 341 -450C414 -450 437 -402 437 -313V0H603V-370C627 -417 671 -450 713 -450C786 -450 809 -402 809 -313V0H975V-343C975 -414 946 -463 910 -491C875 -518 819 -536 758 -536C687 -536 629 -517 568 -462C559 -474 550 -483 540 -491C504 -519 448 -536 385 -536C331 -536 277 -521 231 -488V-526H65ZM1369 10C1550 10 1678 -96 1678 -263C1678 -422 1551 -536 1369 -536C1188 -536 1060 -422 1060 -263C1060 -95 1189 10 1369 10ZM1369 -76C1281 -76 1228 -154 1228 -263C1228 -373 1282 -450 1369 -450C1456 -450 1510 -373 1510 -263C1510 -153 1456 -76 1369 -76ZM2023 10C2191 10 2303 -51 2303 -160C2303 -263 2212 -302 2111 -306L2000 -310C1947 -312 1909 -335 1909 -380C1909 -429 1958 -450 2011 -450C2080 -450 2121 -410 2121 -354H2291C2282 -470 2148 -536 2011 -536C1851 -536 1741 -473 1741 -372C1741 -270 1830 -230 1927 -225L2052 -218C2103 -215 2135 -192 2135 -147C2135 -97 2091 -76 2027 -76C1951 -76 1908 -118 1908 -176H1738C1747 -56 1886 10 2023 10ZM2548 0H2728V-86H2668C2618 -86 2600 -109 2600 -153V-440H2728V-526H2600V-670H2434V-526H2343V-440H2434V-114C2434 -37 2476 0 2548 0ZM2716 -270H3027V-364H2716ZM3403 10C3584 10 3712 -96 3712 -263C3712 -422 3585 -536 3403 -536C3222 -536 3094 -422 3094 -263C3094 -95 3223 10 3403 10ZM3403 -76C3315 -76 3262 -154 3262 -263C3262 -373 3316 -450 3403 -450C3490 -450 3544 -373 3544 -263C3544 -153 3490 -76 3403 -76ZM3738 -526 3888 0H4047L4141 -380L4258 0H4408L4535 -526H4419L4336 -154L4235 -526H4077L3985 -154L3899 -526ZM4605 0H4771V-370C4795 -417 4839 -450 4881 -450C4954 -450 4977 -402 4977 -313V0H5143V-343C5143 -414 5115 -464 5080 -491C5044 -519 4988 -536 4925 -536C4871 -536 4817 -521 4771 -488V-526H4605ZM5545 10C5697 10 5822 -70 5848 -196H5678C5665 -125 5622 -76 5545 -76C5452 -76 5401 -145 5396 -245H5849C5854 -439 5705 -536 5546 -536C5392 -536 5228 -445 5228 -263C5228 -96 5364 10 5545 10ZM5682 -331H5403C5419 -404 5469 -450 5545 -450C5627 -450 5674 -404 5682 -331ZM6188 -536C6024 -536 5909 -423 5909 -263C5909 -103 6024 10 6188 10C6248 10 6313 -4 6361 -42V0H6527V-700H6361V-483C6314 -519 6250 -536 6188 -536ZM6221 -76C6131 -76 6077 -148 6077 -263C6077 -378 6130 -450 6221 -450C6311 -450 6365 -378 6365 -263C6365 -148 6311 -76 6221 -76Z"/></svg><svg viewBox="0 -810 2367 1000" style="width:2.367em" aria-hidden="true" focusable="false"><path d="M404 -536C342 -536 278 -519 231 -483V-526H65V180H231V-42C279 -4 344 10 404 10C568 10 683 -103 683 -263C683 -423 568 -536 404 -536ZM371 -76C281 -76 227 -148 227 -263C227 -378 281 -450 371 -450C462 -450 515 -378 515 -263C515 -148 461 -76 371 -76ZM984 10C1044 10 1105 -7 1153 -44V0H1319V-334C1319 -478 1189 -536 1049 -536C903 -536 775 -474 763 -354H933C944 -419 990 -450 1051 -450C1109 -450 1150 -432 1150 -389C1150 -345 1103 -332 975 -325C861 -319 748 -294 748 -162C748 -48 843 10 984 10ZM1014 -75C955 -75 916 -105 916 -158C916 -209 945 -238 1015 -243C1067 -247 1122 -255 1153 -276V-155C1128 -111 1080 -75 1014 -75ZM1433 0H1599V-526H1433ZM1431 -577H1601V-700H1431ZM1963 -536C1799 -536 1684 -423 1684 -263C1684 -103 1799 10 1963 10C2023 10 2088 -4 2136 -42V0H2302V-700H2136V-483C2089 -519 2025 -536 1963 -536ZM1996 -76C1906 -76 1852 -148 1852 -263C1852 -378 1905 -450 1996 -450C2086 -450 2140 -378 2140 -263C2140 -148 2086 -76 1996 -76Z"/></svg><svg viewBox="0 -810 3989 1000" style="width:3.989em" aria-hidden="true" focusable="false"><path d="M350 190C521 190 657 107 657 -56V-526H491V-487C443 -520 385 -536 318 -536C148 -536 40 -439 40 -283C40 -127 149 -31 318 -31C381 -31 441 -45 491 -79V-36C491 60 435 104 350 104C271 104 222 58 222 -9H52C62 128 214 190 350 190ZM348 -117C264 -117 208 -180 208 -283C208 -387 264 -450 348 -450C433 -450 491 -388 491 -283C491 -179 433 -117 348 -117ZM989 10C1049 10 1110 -7 1158 -44V0H1324V-334C1324 -478 1194 -536 1054 -536C908 -536 780 -474 768 -354H938C949 -419 995 -450 1056 -450C1114 -450 1155 -432 1155 -389C1155 -345 1108 -332 980 -325C866 -319 753 -294 753 -162C753 -48 848 10 989 10ZM1019 -75C960 -75 921 -105 921 -158C921 -209 950 -238 1020 -243C1072 -247 1127 -255 1158 -276V-155C1133 -111 1085 -75 1019 -75ZM1441 0H1607V-370C1631 -417 1675 -450 1717 -450C1790 -450 1813 -402 1813 -313V0H1979V-370C2003 -417 2047 -450 2089 -450C2162 -450 2185 -402 2185 -313V0H2351V-343C2351 -414 2322 -463 2286 -491C2251 -518 2195 -536 2134 -536C2063 -536 2005 -517 1944 -462C1935 -474 1926 -483 1916 -491C1880 -519 1824 -536 1761 -536C1707 -536 1653 -521 1607 -488V-526H1441ZM2753 10C2905 10 3030 -70 3056 -196H2886C2873 -125 2830 -76 2753 -76C2660 -76 2609 -145 2604 -245H3057C3062 -439 2913 -536 2754 -536C2600 -536 2436 -445 2436 -263C2436 -96 2572 10 2753 10ZM2890 -331H2611C2627 -404 2677 -450 2753 -450C2835 -450 2882 -404 2890 -331ZM3402 10C3570 10 3682 -51 3682 -160C3682 -263 3591 -302 3490 -306L3379 -310C3326 -312 3288 -335 3288 -380C3288 -429 3337 -450 3390 -450C3459 -450 3500 -410 3500 -354H3670C3661 -470 3527 -536 3390 -536C3230 -536 3120 -473 3120 -372C3120 -270 3209 -230 3306 -225L3431 -218C3482 -215 3514 -192 3514 -147C3514 -97 3470 -76 3406 -76C3330 -76 3287 -118 3287 -176H3117C3126 -56 3265 10 3402 10ZM3764 0H3934V-168H3764ZM3764 -358H3934V-526H3764Z"/></svg></span><span class="tg"><svg viewBox="0 -810 3088 1000" style="width:3.088em" aria-hidden="true" focusable="false"><path d="M404 -536C342 -536 278 -519 231 -483V-526H65V180H231V-42C279 -4 344 10 404 10C568 10 683 -103 683 -263C683 -423 568 -536 404 -536ZM371 -76C281 -76 227 -148 227 -263C227 -378 281 -450 371 -450C462 -450 515 -378 515 -263C515 -148 461 -76 371 -76ZM778 0H944V-274C963 -358 1032 -382 1086 -382C1112 -382 1137 -378 1157 -368V-532C1149 -534 1134 -536 1121 -536C1049 -536 992 -489 944 -426V-526H778ZM1219 0H1385V-526H1219ZM1217 -577H1387V-700H1217ZM1787 10C1939 10 2067 -71 2091 -216H1921C1909 -128 1865 -76 1787 -76C1690 -76 1638 -154 1638 -263C1638 -373 1691 -450 1787 -450C1865 -450 1909 -398 1921 -310H2091C2067 -455 1938 -536 1787 -536C1606 -536 1470 -422 1470 -263C1470 -96 1606 10 1787 10ZM2466 10C2618 10 2743 -70 2769 -196H2599C2586 -125 2543 -76 2466 -76C2373 -76 2322 -145 2317 -245H2770C2775 -439 2626 -536 2467 -536C2313 -536 2149 -445 2149 -263C2149 -96 2285 10 2466 10ZM2603 -331H2324C2340 -404 2390 -450 2466 -450C2548 -450 2595 -404 2603 -331ZM2871 105H2855V177H2871C2951 177 3033 147 3033 27V-168H2863V0H2936C2950 0 2958 7 2958 25C2958 67 2936 105 2871 105Z"/></svg><svg viewBox="0 -810 3945 1000" style="width:3.945em" aria-hidden="true" focusable="false"><path d="M404 -536C342 -536 278 -519 231 -483V-526H65V180H231V-42C279 -4 344 10 404 10C568 10 683 -103 683 -263C683 -423 568 -536 404 -536ZM371 -76C281 -76 227 -148 227 -263C227 -378 281 -450 371 -450C462 -450 515 -378 515 -263C515 -148 461 -76 371 -76ZM778 0H944V-700H778ZM1276 10C1336 10 1397 -7 1445 -44V0H1611V-334C1611 -478 1481 -536 1341 -536C1195 -536 1067 -474 1055 -354H1225C1236 -419 1282 -450 1343 -450C1401 -450 1442 -432 1442 -389C1442 -345 1395 -332 1267 -325C1153 -319 1040 -294 1040 -162C1040 -48 1135 10 1276 10ZM1306 -75C1247 -75 1208 -105 1208 -158C1208 -209 1237 -238 1307 -243C1359 -247 1414 -255 1445 -276V-155C1420 -111 1372 -75 1306 -75ZM1775 180H1905L2216 -526H2086L1957 -234L1815 -526H1639L1877 -51ZM2542 10C2694 10 2819 -70 2845 -196H2675C2662 -125 2619 -76 2542 -76C2449 -76 2398 -145 2393 -245H2846C2851 -439 2702 -536 2543 -536C2389 -536 2225 -445 2225 -263C2225 -96 2361 10 2542 10ZM2679 -331H2400C2416 -404 2466 -450 2542 -450C2624 -450 2671 -404 2679 -331ZM2935 0H3101V-274C3120 -358 3189 -382 3243 -382C3269 -382 3294 -378 3314 -368V-532C3306 -534 3291 -536 3278 -536C3206 -536 3149 -489 3101 -426V-526H2935ZM3630 10C3798 10 3910 -51 3910 -160C3910 -263 3819 -302 3718 -306L3607 -310C3554 -312 3516 -335 3516 -380C3516 -429 3565 -450 3618 -450C3687 -450 3728 -410 3728 -354H3898C3889 -470 3755 -536 3618 -536C3458 -536 3348 -473 3348 -372C3348 -270 3437 -230 3534 -225L3659 -218C3710 -215 3742 -192 3742 -147C3742 -97 3698 -76 3634 -76C3558 -76 3515 -118 3515 -176H3345C3354 -56 3493 10 3630 10Z"/></svg><svg viewBox="0 -810 2029 1000" style="width:2.029em" aria-hidden="true" focusable="false"><path d="M271 10C331 10 392 -7 440 -44V0H606V-334C606 -478 476 -536 336 -536C190 -536 62 -474 50 -354H220C231 -419 277 -450 338 -450C396 -450 437 -432 437 -389C437 -345 390 -332 262 -325C148 -319 35 -294 35 -162C35 -48 130 10 271 10ZM301 -75C242 -75 203 -105 203 -158C203 -209 232 -238 302 -243C354 -247 409 -255 440 -276V-155C415 -111 367 -75 301 -75ZM723 0H889V-370C913 -417 957 -450 999 -450C1072 -450 1095 -402 1095 -313V0H1261V-343C1261 -414 1233 -464 1198 -491C1162 -519 1106 -536 1043 -536C989 -536 935 -521 889 -488V-526H723ZM1625 -536C1461 -536 1346 -423 1346 -263C1346 -103 1461 10 1625 10C1685 10 1750 -4 1798 -42V0H1964V-700H1798V-483C1751 -519 1687 -536 1625 -536ZM1658 -76C1568 -76 1514 -148 1514 -263C1514 -378 1567 -450 1658 -450C1748 -450 1802 -378 1802 -263C1802 -148 1748 -76 1658 -76Z"/></svg><svg viewBox="0 -810 4069 1000" style="width:4.069em" aria-hidden="true" focusable="false"><path d="M65 0H231V-274C250 -358 319 -382 373 -382C399 -382 424 -378 444 -368V-532C436 -534 421 -536 408 -536C336 -536 279 -489 231 -426V-526H65ZM776 10C928 10 1053 -70 1079 -196H909C896 -125 853 -76 776 -76C683 -76 632 -145 627 -245H1080C1085 -439 936 -536 777 -536C623 -536 459 -445 459 -263C459 -96 595 10 776 10ZM913 -331H634C650 -404 700 -450 776 -450C858 -450 905 -404 913 -331ZM1544 -526 1405 -127 1264 -526H1089L1307 0H1467L1672 -526ZM1742 0H1908V-526H1742ZM1740 -577H1910V-700H1740ZM2310 10C2462 10 2587 -70 2613 -196H2443C2430 -125 2387 -76 2310 -76C2217 -76 2166 -145 2161 -245H2614C2619 -439 2470 -536 2311 -536C2157 -536 1993 -445 1993 -263C1993 -96 2129 10 2310 10ZM2447 -331H2168C2184 -404 2234 -450 2310 -450C2392 -450 2439 -404 2447 -331ZM2637 -526 2787 0H2946L3040 -380L3157 0H3307L3434 -526H3318L3235 -154L3134 -526H2976L2884 -154L2798 -526ZM3754 10C3922 10 4034 -51 4034 -160C4034 -263 3943 -302 3842 -306L3731 -310C3678 -312 3640 -335 3640 -380C3640 -429 3689 -450 3742 -450C3811 -450 3852 -410 3852 -354H4022C4013 -470 3879 -536 3742 -536C3582 -536 3472 -473 3472 -372C3472 -270 3561 -230 3658 -225L3783 -218C3834 -215 3866 -192 3866 -147C3866 -97 3822 -76 3758 -76C3682 -76 3639 -118 3639 -176H3469C3478 -56 3617 10 3754 10Z"/></svg></span></h1>
-      <p class="sub">142 paid games from the 200 most-owned on Steam. Prices are list prices in US$. Source: Crawlora, State of Steam 2026.</p>
+      <h1 class="title"><span class="vh">Pay More, Get Less?</span><span class="tg"><svg viewBox="0 -810 1944 1000" style="width:1.944em" aria-hidden="true" focusable="false"><path d="M70 0H244V-280H494C649 -280 738 -367 738 -490C738 -615 649 -700 494 -700H70ZM405 -374H244V-606H415C513 -606 562 -564 562 -490C562 -418 513 -374 405 -374ZM999 10C1059 10 1120 -7 1168 -44V0H1334V-334C1334 -478 1204 -536 1064 -536C918 -536 790 -474 778 -354H948C959 -419 1005 -450 1066 -450C1124 -450 1165 -432 1165 -389C1165 -345 1118 -332 990 -325C876 -319 763 -294 763 -162C763 -48 858 10 999 10ZM1029 -75C970 -75 931 -105 931 -158C931 -209 960 -238 1030 -243C1082 -247 1137 -255 1168 -276V-155C1143 -111 1095 -75 1029 -75ZM1498 180H1628L1939 -526H1809L1680 -234L1538 -526H1362L1600 -51Z"/></svg><svg viewBox="0 -810 3048 1000" style="width:3.048em" aria-hidden="true" focusable="false"><path d="M70 -700V0H194V-515L372 0H572L749 -514V0H911V-700H690L489 -113L285 -700ZM1314 10C1495 10 1623 -96 1623 -263C1623 -422 1496 -536 1314 -536C1133 -536 1005 -422 1005 -263C1005 -95 1134 10 1314 10ZM1314 -76C1226 -76 1173 -154 1173 -263C1173 -373 1227 -450 1314 -450C1401 -450 1455 -373 1455 -263C1455 -153 1401 -76 1314 -76ZM1715 0H1881V-274C1900 -358 1969 -382 2023 -382C2049 -382 2074 -378 2094 -368V-532C2086 -534 2071 -536 2058 -536C1986 -536 1929 -489 1881 -426V-526H1715ZM2426 10C2578 10 2703 -70 2729 -196H2559C2546 -125 2503 -76 2426 -76C2333 -76 2282 -145 2277 -245H2730C2735 -439 2586 -536 2427 -536C2273 -536 2109 -445 2109 -263C2109 -96 2245 10 2426 10ZM2563 -331H2284C2300 -404 2350 -450 2426 -450C2508 -450 2555 -404 2563 -331ZM2831 105H2815V177H2831C2911 177 2993 147 2993 27V-168H2823V0H2896C2910 0 2918 7 2918 25C2918 67 2896 105 2831 105Z"/></svg></span><span class="tg"><svg viewBox="0 -810 1929 1000" style="width:1.929em" aria-hidden="true" focusable="false"><path d="M442 10C676 10 829 -122 829 -288V-369H419V-275H653V-268C653 -164 575 -84 442 -84C310 -84 216 -185 216 -350C216 -515 310 -616 442 -616C552 -616 628 -542 641 -434H821C797 -600 647 -710 442 -710C210 -710 40 -567 40 -350C40 -123 210 10 442 10ZM1220 10C1372 10 1497 -70 1523 -196H1353C1340 -125 1297 -76 1220 -76C1127 -76 1076 -145 1071 -245H1524C1529 -439 1380 -536 1221 -536C1067 -536 903 -445 903 -263C903 -96 1039 10 1220 10ZM1357 -331H1078C1094 -404 1144 -450 1220 -450C1302 -450 1349 -404 1357 -331ZM1749 0H1929V-86H1869C1819 -86 1801 -109 1801 -153V-440H1929V-526H1801V-670H1635V-526H1544V-440H1635V-114C1635 -37 1677 0 1749 0Z"/></svg><svg viewBox="0 -810 3232 1000" style="width:3.232em" aria-hidden="true" focusable="false"><path d="M244 -94V-700H70V0H655V-94ZM971 10C1123 10 1248 -70 1274 -196H1104C1091 -125 1048 -76 971 -76C878 -76 827 -145 822 -245H1275C1280 -439 1131 -536 972 -536C818 -536 654 -445 654 -263C654 -96 790 10 971 10ZM1108 -331H829C845 -404 895 -450 971 -450C1053 -450 1100 -404 1108 -331ZM1620 10C1788 10 1900 -51 1900 -160C1900 -263 1809 -302 1708 -306L1597 -310C1544 -312 1506 -335 1506 -380C1506 -429 1555 -450 1608 -450C1677 -450 1718 -410 1718 -354H1888C1879 -470 1745 -536 1608 -536C1448 -536 1338 -473 1338 -372C1338 -270 1427 -230 1524 -225L1649 -218C1700 -215 1732 -192 1732 -147C1732 -97 1688 -76 1624 -76C1548 -76 1505 -118 1505 -176H1335C1344 -56 1483 10 1620 10ZM2252 10C2420 10 2532 -51 2532 -160C2532 -263 2441 -302 2340 -306L2229 -310C2176 -312 2138 -335 2138 -380C2138 -429 2187 -450 2240 -450C2309 -450 2350 -410 2350 -354H2520C2511 -470 2377 -536 2240 -536C2080 -536 1970 -473 1970 -372C1970 -270 2059 -230 2156 -225L2281 -218C2332 -215 2364 -192 2364 -147C2364 -97 2320 -76 2256 -76C2180 -76 2137 -118 2137 -176H1967C1976 -56 2115 10 2252 10ZM2778 -255V-233H2950V-236C2950 -289 2992 -312 3049 -341C3134 -384 3187 -425 3187 -520C3187 -639 3054 -710 2885 -710C2687 -710 2574 -630 2557 -466H2733C2733 -560 2795 -616 2885 -616C2959 -616 3012 -579 3012 -530C3012 -481 2967 -457 2901 -424C2829 -388 2778 -347 2778 -255ZM2779 0H2949V-168H2779Z"/></svg></span></h1>
+      <p class="hook">Steam game prices have doubled since 2012. But among the 142 most-owned paid games, the cheapest are the best-loved.</p>
+      <p class="sub">Read left to right: prices rose, players didn't follow, reviews went the other way. List prices in US$ · Crawlora, State of Steam 2026.</p>
     </div>
     <div class="features" role="group" aria-label="Filters">
       <div class="legend">
-        <p class="legend-title" id="tierTitle">Review tier <span class="hint">darker = better reviewed · click a tier to hide or show it</span></p>
+        <p class="legend-title" id="tierTitle">Review tier <span class="hint">darker = better reviewed · click to hide or show</span></p>
         <div class="tiers" id="tierButtons" role="group" aria-labelledby="tierTitle"></div>
+      </div>
+      <div class="legend">
+        <p class="legend-title" id="studioTitle">Developer <span class="hint">shape in chart 2</span></p>
+        <div class="tiers" id="studioButtons" role="group" aria-labelledby="studioTitle"></div>
       </div>
       <button type="button" id="reset" class="reset">Reset</button>
     </div>
@@ -151,7 +158,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
   <main class="grid">
     <section class="panel" id="p1" aria-labelledby="t1">
       <header>
-        <p class="q"><span class="qn">Q1</span>Is release year related to the price of paid games?</p>
+        <p class="q"><span class="qn">Q1</span>Are paid games getting pricier?</p>
         <h2 id="t1"></h2>
         <p class="desc" id="d1"></p>
         <p class="selnote" id="s1"></p>
@@ -162,7 +169,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 
     <section class="panel" id="p2" aria-labelledby="t2">
       <header>
-        <p class="q"><span class="qn">Q2</span>Do pricier paid games have more peak players?</p>
+        <p class="q"><span class="qn">Q2</span>Do pricier games have more players?</p>
         <h2 id="t2"></h2>
         <p class="desc" id="d2"></p>
         <p class="selnote" id="s2"></p>
@@ -173,7 +180,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 
     <section class="panel" id="p3" aria-labelledby="t3">
       <header>
-        <p class="q"><span class="qn">Q3</span>How do prices compare across the 8 most-owned genres?</p>
+        <p class="q"><span class="qn">Q3</span>Do pricier games get better reviews?</p>
         <h2 id="t3"></h2>
         <p class="desc" id="d3"></p>
         <p class="selnote" id="s3"></p>
@@ -181,27 +188,22 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       <div class="chart" id="c3"></div>
       <details class="tbl"><summary>Data table</summary><div class="tblwrap" id="tb3"></div></details>
     </section>
-
-    <section class="panel" id="p4" aria-labelledby="t4">
-      <header>
-        <p class="q"><span class="qn">Q3</span>How do review-tier shares compare across the same genres?</p>
-        <h2 id="t4"></h2>
-        <p class="desc" id="d4"></p>
-        <p class="selnote" id="s4"></p>
-      </header>
-      <div class="chart" id="c4"></div>
-      <details class="tbl"><summary>Data table</summary><div class="tblwrap" id="tb4"></div></details>
-    </section>
   </main>
+
+  <section class="verdict" aria-labelledby="vt">
+    <h2 id="vt">The verdict</h2>
+    <p><b>Paying more didn't buy more players or better reviews.</b> Median prices doubled, but price barely tracks peak players (r = 0.30), and the share of Overwhelmingly Positive games falls from 70% under $15 to 14% at $50 and up. The best-loved games are mostly cheap, and often indie.</p>
+    <p class="why"><b>Why might that be?</b> A cheap game only reaches Steam's top 200 if people love it, while a $70 blockbuster can get there on brand and marketing. So this is a pattern among popular games, not proof that a higher price causes worse reviews.</p>
+  </section>
 
   <section class="notes" aria-label="Notes">
     <div>
       <h3>How to use</h3>
       <ul>
-        <li><b>Point at</b> a genre bar, a waffle row, a year or a game to highlight the matching marks in the other views.</li>
+        <li><b>Point at</b> a year, a game or a price band to highlight the matching games in the other charts.</li>
         <li><b>Click</b> it (or press Enter or Space) to keep the selection. Click again or press Esc to clear.</li>
         <li><b>Keyboard:</b> Tab moves between charts, arrow keys move between marks inside a chart.</li>
-        <li><b>Review tier buttons</b> filter every view: the lines, bars and correlation are recalculated, and the hidden tier turns hollow in the waffle. Axes and row order stay fixed so the views can be compared before and after.</li>
+        <li><b>Review tier and Developer buttons</b> filter every chart: the lines, dots, correlation and review shares are recalculated. A hidden review tier turns hollow in chart 3. Axes stay fixed so the charts can be compared before and after.</li>
       </ul>
     </div>
     <div>
@@ -209,9 +211,9 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       <ul>
         <li>Top 200 Steam games by owner estimate; 58 free games removed, leaving 142 paid games.</li>
         <li>Price is the list price, not the sale price on the day of the crawl (41 games were discounted).</li>
-        <li>The price chart covers 2012 to 2024, where every year has at least 5 games. 23 games from other years and 1 with no recorded year appear only in the other views.</li>
-        <li>This is a sample of popular games, so prices run higher than Steam as a whole. Casual (10 games) and Massively Multiplayer (13) are small groups.</li>
-        <li>A game counts once in each genre it carries, so genre rows add up to more than 142. One game has no recorded genre and is left out of the genre charts.</li>
+        <li>Chart 1 covers 2012 to 2024, where every year has at least 5 games. 23 games from other years and 1 with no recorded year appear only in charts 2 and 3.</li>
+        <li>Indie means the game carries Steam's Indie tag. One game has no genres recorded and is drawn as a square.</li>
+        <li>This is a sample of popular games, so prices run higher than Steam as a whole. All 22 games at $50 and up are non-indie.</li>
       </ul>
       <p class="cite">Crawlora (2026). <a href="https://github.com/Crawlora-org/steam-catalog-data">Steam Catalog Dataset: State of Steam 2026</a>. CC BY 4.0.</p>
     </div>
@@ -220,17 +222,19 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       <table class="enc">
         <thead><tr><th scope="col">Variable</th><th scope="col">Type</th><th scope="col">Channel</th></tr></thead>
         <tbody>
-          <tr><th scope="row">List price</th><td>Quantitative</td><td>Position on a common $0–$70 scale (y in Q1, x in Q2, bar length in Q3)</td></tr>
-          <tr><th scope="row">Release year</th><td>Ordinal</td><td>Position, left to right (x in Q1)</td></tr>
-          <tr><th scope="row">Peak players</th><td>Quantitative</td><td>Position on a log scale (y in Q2)</td></tr>
-          <tr><th scope="row">Genre</th><td>Nominal</td><td>Spatial region: one labelled row per genre (Q3)</td></tr>
-          <tr><th scope="row">Review tier</th><td>Ordinal</td><td>Colour luminance, one hue, light to dark (Q2 dots, Q3 squares)</td></tr>
+          <tr><th scope="row">List price</th><td>Quantitative</td><td>Position on a common $0–$70 scale (y in chart 1, x in chart 2)</td></tr>
+          <tr><th scope="row">Release year</th><td>Ordinal</td><td>Position, left to right (x in chart 1)</td></tr>
+          <tr><th scope="row">Peak players</th><td>Quantitative</td><td>Position on a log scale (y in chart 2)</td></tr>
+          <tr><th scope="row">Review tier</th><td>Ordinal</td><td>Colour luminance, one hue, light to dark (chart 2 dots); share as length (chart 3)</td></tr>
+          <tr><th scope="row">Price band</th><td>Ordinal</td><td>Spatial region: one labelled row per band, cheapest at the top (chart 3)</td></tr>
+          <tr><th scope="row">Indie flag</th><td>Nominal</td><td>Shape: circle for indie, triangle for non-indie (chart 2)</td></tr>
           <tr><th scope="row">Game name</th><td>Nominal</td><td>Tooltip (details on demand)</td></tr>
         </tbody>
       </table>
       <ul>
-        <li>Review-tier colour is not used on the Q1 line, because each point there averages games of every tier.</li>
-        <li>Top 8 genres are ranked among paid games, so Strategy replaces Free To Play.</li>
+        <li>After the prototype demo, Q3 changed from comparing 8 genres in two charts to one question, “Do pricier games get better reviews?”, in one chart of 4 price bands.</li>
+        <li>Genre is replaced by the Indie flag, so the data keeps one simple nominal variable.</li>
+        <li>Review-tier colour is not used on the chart 1 lines, because each point there averages games of every tier.</li>
         <li>Dots with the same price are nudged sideways (jitter) instead of made transparent, because transparency would change the luminance that encodes review tier.</li>
         <li>Orange marks your selection; grey marks context.</li>
       </ul>
@@ -244,7 +248,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 
 </script>
 <script>
-window.STEAM_DATA = {"games":[{"id":2358720,"n":"Black Myth: Wukong","p":59.99,"c":15004,"y":2024,"t":4,"g":["Action","Adventure","RPG"]},{"id":550,"n":"Left 4 Dead 2","p":9.99,"c":25122,"y":2009,"t":4,"g":["Action"]},{"id":1938090,"n":"Call of Duty","p":69.99,"c":67419,"y":2022,"t":1,"g":["Action"]},{"id":1623730,"n":"Palworld","p":29.99,"c":18028,"y":2026,"t":3,"g":["Action","Adventure","Indie","RPG"]},{"id":1063730,"n":"New World: Aeternum","p":59.99,"c":5583,"y":2021,"t":1,"g":["Action","Adventure","Massively Multiplayer","RPG"]},{"id":105600,"n":"Terraria","p":9.99,"c":24580,"y":2011,"t":4,"g":["Action","Adventure","Indie","RPG"]},{"id":252490,"n":"Rust","p":39.99,"c":143870,"y":2018,"t":3,"g":["Action","Adventure","Indie","Massively Multiplayer","RPG"]},{"id":4000,"n":"Garry's Mod","p":9.99,"c":18400,"y":2006,"t":4,"g":["Casual","Indie","Simulation"]},{"id":1245620,"n":"ELDEN RING","p":59.99,"c":29529,"y":2022,"t":3,"g":["Action","RPG"]},{"id":553850,"n":"HELLDIVERS 2","p":39.99,"c":53399,"y":2024,"t":2,"g":["Action"]},{"id":431960,"n":"Wallpaper Engine","p":4.99,"c":91184,"y":2018,"t":4,"g":["Casual","Indie","Animation & Modeling","Design & Illustration","Photo Editing","Utilities"]},{"id":413150,"n":"Stardew Valley","p":14.99,"c":50662,"y":2016,"t":4,"g":["Indie","RPG","Simulation"]},{"id":1091500,"n":"Cyberpunk 2077","p":59.99,"c":22265,"y":2020,"t":3,"g":["RPG"]},{"id":292030,"n":"The Witcher 3: Wild Hunt","p":39.99,"c":15893,"y":2015,"t":4,"g":["RPG"]},{"id":381210,"n":"Dead by Daylight","p":19.99,"c":44886,"y":2016,"t":2,"g":["Action"]},{"id":1086940,"n":"Baldur's Gate 3","p":59.99,"c":54771,"y":2023,"t":4,"g":["Adventure","RPG","Strategy"]},{"id":346110,"n":"ARK: Survival Evolved","p":14.99,"c":22170,"y":2017,"t":3,"g":["Action","Adventure","Indie","Massively Multiplayer","RPG"]},{"id":945360,"n":"Among Us","p":4.99,"c":3832,"y":2018,"t":3,"g":["Casual"]},{"id":218620,"n":"PAYDAY 2","p":9.99,"c":27254,"y":2013,"t":3,"g":["Action","RPG"]},{"id":242760,"n":"The Forest","p":19.99,"c":2892,"y":2018,"t":4,"g":["Action","Adventure","Indie","Simulation"]},{"id":990080,"n":"Hogwarts Legacy","p":59.99,"c":5716,"y":2023,"t":3,"g":["Action","Adventure","RPG"]},{"id":2246340,"n":"Monster Hunter Wilds","p":69.99,"c":12494,"y":2025,"t":1,"g":["Action","Adventure","RPG"]},{"id":2694490,"n":"Path of Exile 2","p":29.99,"c":16727,"y":2024,"t":2,"g":["Action","Adventure","Massively Multiplayer","RPG","Early Access"]},{"id":899770,"n":"Last Epoch","p":34.99,"c":5831,"y":2024,"t":2,"g":["Action","Adventure","Indie","RPG"]},{"id":340,"n":"Half-Life 2: Lost Coast","p":19.99,"c":2,"y":2005,"t":3,"g":["Action"]},{"id":227300,"n":"Euro Truck Simulator 2","p":19.99,"c":17281,"y":2012,"t":4,"g":["Indie","Simulation"]},{"id":739630,"n":"Phasmophobia","p":19.99,"c":9978,"y":2020,"t":4,"g":["Action","Indie","Early Access"]},{"id":1174180,"n":"Red Dead Redemption 2","p":59.99,"c":29885,"y":2019,"t":3,"g":["Action","Adventure"]},{"id":892970,"n":"Valheim","p":19.99,"c":14439,"y":2021,"t":3,"g":["Action","Adventure","Indie","RPG","Early Access"]},{"id":322330,"n":"Don't Starve Together","p":14.99,"c":30542,"y":2016,"t":4,"g":["Action","Adventure","Indie","RPG","Simulation","Strategy"]},{"id":582010,"n":"Monster Hunter: World","p":29.99,"c":11923,"y":2018,"t":3,"g":["Action"]},{"id":1966720,"n":"Lethal Company","p":9.99,"c":6199,"y":2023,"t":4,"g":["Action","Adventure","Indie","Early Access"]},{"id":239140,"n":"Dying Light","p":24.99,"c":4953,"y":2015,"t":4,"g":["Action","Adventure","RPG"]},{"id":221100,"n":"DayZ","p":49.99,"c":37066,"y":2018,"t":2,"g":["Action","Adventure","Massively Multiplayer"]},{"id":377160,"n":"Fallout 4","p":19.99,"c":11179,"y":2015,"t":3,"g":["RPG"]},{"id":108600,"n":"Project Zomboid","p":19.99,"c":22864,"y":2013,"t":3,"g":["Indie","RPG","Simulation","Early Access"]},{"id":251570,"n":"7 Days to Die","p":44.99,"c":17045,"y":2024,"t":3,"g":["Action","Adventure","Indie","RPG","Simulation","Strategy"]},{"id":289070,"n":"Sid Meier's Civilization VI","p":59.99,"c":25420,"y":2016,"t":3,"g":["Strategy"]},{"id":648800,"n":"Raft","p":19.99,"c":4701,"y":2022,"t":3,"g":["Adventure","Indie","Simulation"]},{"id":814380,"n":"Sekiro: Shadows Die Twice - GOTY Edition","p":59.99,"c":6767,"y":2019,"t":4,"g":["Action","Adventure"]},{"id":1517290,"n":"Battlefield 2042","p":59.99,"c":2774,"y":2021,"t":1,"g":["Action","Adventure","Casual"]},{"id":49520,"n":"Borderlands 2","p":19.99,"c":8551,"y":2012,"t":3,"g":["Action","RPG"]},{"id":107410,"n":"Arma 3","p":29.99,"c":7181,"y":2013,"t":3,"g":["Action","Simulation","Strategy"]},{"id":255710,"n":"Cities: Skylines","p":29.99,"c":8842,"y":2015,"t":3,"g":["Simulation","Strategy"]},{"id":261550,"n":"Mount & Blade II: Bannerlord","p":49.99,"c":14477,"y":2022,"t":3,"g":["Action","Indie","RPG","Simulation","Strategy"]},{"id":1326470,"n":"Sons Of The Forest","p":29.99,"c":4450,"y":2024,"t":3,"g":["Action","Adventure","Indie","Simulation"]},{"id":1238810,"n":"Battlefield V","p":49.99,"c":6327,"y":2020,"t":2,"g":["Action"]},{"id":10,"n":"Counter-Strike","p":9.99,"c":7323,"y":2000,"t":4,"g":["Action"]},{"id":594650,"n":"Hunt: Showdown 1896","p":29.99,"c":6300,"y":2019,"t":2,"g":["Action"]},{"id":220,"n":"Half-Life 2","p":9.99,"c":1555,"y":2004,"t":4,"g":["Action"]},{"id":526870,"n":"Satisfactory","p":39.99,"c":12596,"y":2024,"t":4,"g":["Adventure","Indie","Simulation","Strategy"]},{"id":477160,"n":"Human Fall Flat","p":19.99,"c":950,"y":2016,"t":3,"g":["Adventure","Casual","Indie","Simulation"]},{"id":8930,"n":"Sid Meier's Civilization V","p":29.99,"c":12206,"y":2010,"t":4,"g":["Strategy"]},{"id":3164500,"n":"Schedule I","p":19.99,"c":22757,"y":2025,"t":4,"g":["Action","Indie","Simulation","Strategy","Early Access"]},{"id":3241660,"n":"R.E.P.O.","p":9.99,"c":32349,"y":2025,"t":4,"g":["Action","Early Access"]},{"id":240,"n":"Counter-Strike: Source","p":9.99,"c":6187,"y":2004,"t":4,"g":["Action"]},{"id":400,"n":"Portal","p":9.99,"c":638,"y":2007,"t":4,"g":["Action"]},{"id":70,"n":"Half-Life","p":9.99,"c":634,"y":1998,"t":4,"g":["Action"]},{"id":219990,"n":"Grim Dawn","p":24.99,"c":2376,"y":2016,"t":3,"g":["Action","Adventure","Indie","RPG"]},{"id":2186680,"n":"Warhammer 40,000: Rogue Trader","p":49.99,"c":3582,"y":2023,"t":3,"g":["Action","Adventure","Indie","RPG","Strategy"]},{"id":80,"n":"Counter-Strike: Condition Zero","p":9.99,"c":83,"y":2004,"t":3,"g":["Action"]},{"id":320,"n":"Half-Life 2: Deathmatch","p":19.99,"c":159,"y":2004,"t":3,"g":["Action"]},{"id":417910,"n":"Street Warriors Online","p":1.99,"c":1,"y":2016,"t":1,"g":["Action","Massively Multiplayer","Simulation","Sports"]},{"id":1116170,"n":"CyberCorp","p":14.99,"c":3,"y":2025,"t":3,"g":["Action","Adventure","Indie","RPG"]},{"id":620,"n":"Portal 2","p":9.99,"c":1959,"y":2011,"t":4,"g":["Action","Adventure"]},{"id":322170,"n":"Geometry Dash","p":4.99,"c":27850,"y":2014,"t":3,"g":["Action","Indie"]},{"id":367520,"n":"Hollow Knight","p":14.99,"c":4912,"y":2017,"t":4,"g":["Action","Adventure","Indie"]},{"id":374320,"n":"DARK SOULS III","p":59.99,"c":4381,"y":2016,"t":3,"g":["Action"]},{"id":1172620,"n":"Sea of Thieves: 2026 Edition","p":39.99,"c":5437,"y":2020,"t":3,"g":["Action","Adventure"]},{"id":275850,"n":"No Man's Sky","p":59.99,"c":12291,"y":2016,"t":3,"g":["Action","Adventure"]},{"id":250900,"n":"The Binding of Isaac: Rebirth","p":14.99,"c":14904,"y":2014,"t":4,"g":["Action"]},{"id":548430,"n":"Deep Rock Galactic","p":29.99,"c":5216,"y":2020,"t":4,"g":["Action"]},{"id":394360,"n":"Hearts of Iron IV","p":49.99,"c":32112,"y":2016,"t":3,"g":["Simulation","Strategy"]},{"id":489830,"n":"The Elder Scrolls V: Skyrim Special Edition","p":39.99,"c":25085,"y":2016,"t":3,"g":["RPG"]},{"id":284160,"n":"BeamNG.drive","p":24.99,"c":15863,"y":2015,"t":4,"g":["Racing","Simulation","Early Access"]},{"id":72850,"n":"The Elder Scrolls V: Skyrim","p":19.99,"c":1463,"y":2011,"t":3,"g":["RPG"]},{"id":264710,"n":"Subnautica","p":29.99,"c":2719,"y":2018,"t":4,"g":["Adventure","Indie"]},{"id":632360,"n":"Risk of Rain 2","p":24.99,"c":7902,"y":2020,"t":3,"g":["Action","Indie"]},{"id":1118200,"n":"People Playground","p":9.99,"c":4505,"y":2019,"t":4,"g":["Action","Casual","Indie","Simulation"]},{"id":1145360,"n":"Hades","p":24.99,"c":2253,"y":2020,"t":4,"g":["Action","Indie","RPG"]},{"id":391540,"n":"Undertale","p":9.99,"c":3331,"y":2015,"t":4,"g":["Indie","RPG"]},{"id":1237970,"n":"Titanfall 2","p":29.99,"c":1173,"y":2020,"t":4,"g":["Action"]},{"id":1794680,"n":"Vampire Survivors","p":4.99,"c":2966,"y":2022,"t":4,"g":["Action","Casual","Indie","RPG"]},{"id":203160,"n":"Tomb Raider Game of the Year","p":19.99,"c":556,"y":2013,"t":4,"g":["Action","Adventure"]},{"id":976730,"n":"Halo: The Master Chief Collection","p":39.99,"c":3362,"y":2019,"t":3,"g":["Action"]},{"id":1144200,"n":"Ready or Not","p":49.99,"c":4296,"y":2023,"t":3,"g":["Action","Adventure","Indie"]},{"id":22380,"n":"Fallout: New Vegas","p":9.99,"c":3892,"y":2010,"t":4,"g":["Action","RPG"]},{"id":1551360,"n":"Forza Horizon 5","p":59.99,"c":10009,"y":2021,"t":3,"g":["Action","Adventure","Racing","Simulation","Sports"]},{"id":1426210,"n":"It Takes Two","p":39.99,"c":5018,"y":2021,"t":4,"g":["Action","Adventure"]},{"id":427520,"n":"Factorio","p":35.0,"c":16426,"y":2020,"t":4,"g":["Casual","Indie","Simulation","Strategy"]},{"id":311210,"n":"Call of Duty: Black Ops III","p":59.99,"c":5414,"y":2015,"t":3,"g":["Action","Adventure"]},{"id":294100,"n":"RimWorld","p":34.99,"c":19211,"y":2018,"t":4,"g":["Indie","Simulation","Strategy"]},{"id":379720,"n":"DOOM","p":19.99,"c":1590,"y":2016,"t":4,"g":["Action"]},{"id":782330,"n":"DOOM Eternal","p":29.99,"c":2262,"y":2020,"t":3,"g":["Action"]},{"id":534380,"n":"Dying Light 2 Stay Human: Reloaded Edition","p":59.99,"c":4223,"y":2022,"t":2,"g":["Action","Adventure","RPG"]},{"id":1238840,"n":"Battlefield 1","p":39.99,"c":6308,"y":2020,"t":3,"g":["Action","Massively Multiplayer"]},{"id":435150,"n":"Divinity: Original Sin 2 - Definitive Edition","p":44.99,"c":3510,"y":2017,"t":4,"g":["Adventure","RPG","Strategy"]},{"id":268910,"n":"Cuphead","p":19.99,"c":2080,"y":2017,"t":4,"g":["Action","Indie"]},{"id":646570,"n":"Slay the Spire","p":24.99,"c":15038,"y":2019,"t":4,"g":["Indie","Strategy"]},{"id":2050650,"n":"Resident Evil 4","p":39.99,"c":3748,"y":2023,"t":4,"g":["Action","Adventure"]},{"id":518790,"n":"theHunter: Call of the Wild","p":19.99,"c":2207,"y":2017,"t":3,"g":["Adventure","Simulation","Sports"]},{"id":12210,"n":"Grand Theft Auto IV: The Complete Edition","p":19.99,"c":2122,"y":2020,"t":3,"g":["Action","Adventure"]},{"id":883710,"n":"Resident Evil 2","p":39.99,"c":1123,"y":2019,"t":4,"g":["Action"]},{"id":812140,"n":"Assassin's Creed Odyssey","p":59.99,"c":2629,"y":2018,"t":3,"g":["Action","Adventure","RPG"]},{"id":1229490,"n":"ULTRAKILL","p":29.99,"c":3122,"y":2020,"t":4,"g":["Action","Indie","Early Access"]},{"id":588650,"n":"Dead Cells","p":24.99,"c":2559,"y":2018,"t":4,"g":["Action","Adventure","Indie"]},{"id":48700,"n":"Mount & Blade: Warband","p":19.99,"c":3055,"y":2010,"t":4,"g":["Action","RPG"]},{"id":2183900,"n":"Warhammer 40,000: Space Marine 2","p":59.99,"c":6851,"y":2024,"t":3,"g":["Action","Adventure","RPG"]},{"id":1593500,"n":"God of War","p":49.99,"c":1380,"y":2022,"t":4,"g":["Action","Adventure","RPG"]},{"id":1332010,"n":"Stray","p":29.99,"c":498,"y":2022,"t":4,"g":["Adventure","Indie"]},{"id":306130,"n":"The Elder Scrolls Online","p":19.99,"c":15987,"y":2017,"t":3,"g":["Action","Adventure","Massively Multiplayer","RPG"]},{"id":244210,"n":"Assetto Corsa","p":19.99,"c":8961,"y":2014,"t":3,"g":["Indie","Racing","Simulation","Sports"]},{"id":304390,"n":"FOR HONOR","p":29.99,"c":2146,"y":2017,"t":1,"g":["Action"]},{"id":601150,"n":"Devil May Cry 5","p":29.99,"c":2248,"y":2019,"t":4,"g":["Action"]},{"id":2881650,"n":"Content Warning","p":7.99,"c":722,"y":2024,"t":3,"g":["Action","Adventure","Indie"]},{"id":671860,"n":"BattleBit Remastered","p":14.99,"c":568,"y":2023,"t":3,"g":["Action","Massively Multiplayer","Early Access"]},{"id":236850,"n":"Europa Universalis IV","p":49.99,"c":12445,"y":2013,"t":3,"g":["Simulation","Strategy"]},{"id":1868140,"n":"DAVE THE DIVER","p":19.99,"c":3367,"y":2023,"t":4,"g":["Adventure","Casual","RPG","Simulation"]},{"id":204360,"n":"Castle Crashers","p":14.99,"c":443,"y":2012,"t":4,"g":["Action","Adventure","Casual","Indie","RPG"]},{"id":594570,"n":"Total War: WARHAMMER II","p":59.99,"c":1464,"y":2017,"t":3,"g":["Action","Strategy"]},{"id":225540,"n":"Just Cause 3","p":19.99,"c":639,"y":2015,"t":3,"g":["Action","Adventure"]},{"id":1604030,"n":"V Rising","p":34.99,"c":10961,"y":2024,"t":3,"g":["Action","Adventure","Massively Multiplayer"]},{"id":223470,"n":"POSTAL 2","p":9.99,"c":320,"y":2012,"t":4,"g":["Action","Adventure","Indie"]},{"id":1446780,"n":"MONSTER HUNTER RISE","p":39.99,"c":3658,"y":2022,"t":3,"g":["Action"]},{"id":513710,"n":"SCUM","p":44.99,"c":8535,"y":2025,"t":2,"g":["Action","Adventure","Indie","Massively Multiplayer"]},{"id":286690,"n":"Metro 2033 Redux","p":19.99,"c":1208,"y":2014,"t":3,"g":["Action"]},{"id":424840,"n":"Little Nightmares","p":19.99,"c":222,"y":2017,"t":3,"g":["Adventure"]},{"id":231430,"n":"Company of Heroes 2","p":19.99,"c":2330,"y":2013,"t":2,"g":["Strategy"]},{"id":2195250,"n":"EA SPORTS FC 24","p":69.99,"c":5110,"y":2023,"t":1,"g":["Simulation","Sports"]},{"id":440900,"n":"Conan Exiles Enhanced","p":39.99,"c":5677,"y":2018,"t":2,"g":["Action","Adventure","Massively Multiplayer","RPG","Simulation","Strategy"]},{"id":779340,"n":"Total War: THREE KINGDOMS","p":39.99,"c":4507,"y":2019,"t":2,"g":["Action","Strategy"]},{"id":268500,"n":"XCOM 2","p":19.99,"c":3123,"y":2016,"t":3,"g":["Strategy"]},{"id":221380,"n":"Age of Empires II (Retired)","p":19.99,"c":2278,"y":2013,"t":4,"g":["Strategy"]},{"id":365590,"n":"Tom Clancy's The Division","p":29.99,"c":774,"y":2016,"t":2,"g":["Action","Adventure","RPG"]},{"id":241930,"n":"Middle-earth: Shadow of Mordor","p":19.99,"c":441,"y":2014,"t":3,"g":[]},{"id":582660,"n":"Black Desert","p":9.99,"c":14345,"y":2017,"t":2,"g":["Action","Adventure","Massively Multiplayer","RPG","Strategy"]},{"id":206420,"n":"Saints Row IV: Re-Elected","p":19.99,"c":117,"y":2013,"t":3,"g":["Action","Adventure"]},{"id":2669320,"n":"EA SPORTS FC 25","p":69.99,"c":42032,"y":2024,"t":1,"g":["Simulation","Sports"]},{"id":233450,"n":"Prison Architect","p":29.99,"c":781,"y":2015,"t":3,"g":["Indie","Simulation","Strategy"]},{"id":242050,"n":"Assassin's Creed IV Black Flag","p":39.99,"c":923,"y":null,"t":3,"g":["Action","Adventure"]},{"id":219640,"n":"Chivalry: Medieval Warfare","p":24.99,"c":32,"y":2012,"t":3,"g":["Action","Indie"]},{"id":500,"n":"Left 4 Dead","p":9.99,"c":774,"y":2008,"t":4,"g":["Action"]}],"genres":[{"name":"Strategy","n":25,"median":35.0,"mean":36.3904,"counts":{"1":0,"2":4,"3":11,"4":10},"squares":{"1":0,"2":3,"3":9,"4":8}},{"name":"Massively Multiplayer","n":13,"median":34.99,"mean":30.91307692307693,"counts":{"1":2,"2":5,"3":6,"4":0},"squares":{"1":3,"2":8,"3":9,"4":0}},{"name":"Action","n":103,"median":29.99,"mean":30.62106796116504,"counts":{"1":6,"2":13,"3":45,"4":39},"squares":{"1":1,"2":2,"3":9,"4":8}},{"name":"Adventure","n":62,"median":29.99,"mean":34.87709677419353,"counts":{"1":3,"2":8,"3":29,"4":22},"squares":{"1":1,"2":3,"3":9,"4":7}},{"name":"RPG","n":45,"median":29.99,"mean":33.32333333333333,"counts":{"1":2,"2":6,"3":21,"4":16},"squares":{"1":1,"2":3,"3":9,"4":7}},{"name":"Simulation","n":30,"median":27.49,"mean":30.723666666666666,"counts":{"1":3,"2":1,"3":14,"4":12},"squares":{"1":2,"2":1,"3":9,"4":8}},{"name":"Indie","n":48,"median":19.99,"mean":23.49020833333333,"counts":{"1":0,"2":2,"3":20,"4":26},"squares":{"1":0,"2":1,"3":8,"4":11}},{"name":"Casual","n":10,"median":12.49,"mean":18.491000000000003,"counts":{"1":1,"2":0,"3":2,"4":7},"squares":{"1":2,"2":0,"3":4,"4":14}}],"window":[2012,2024]};
+window.STEAM_DATA = {"games":[{"id":2358720,"n":"Black Myth: Wukong","p":59.99,"c":15004,"y":2024,"t":4,"s":"n","b":4,"g":["Action","Adventure","RPG"]},{"id":550,"n":"Left 4 Dead 2","p":9.99,"c":25122,"y":2009,"t":4,"s":"n","b":1,"g":["Action"]},{"id":1938090,"n":"Call of Duty","p":69.99,"c":67419,"y":2022,"t":1,"s":"n","b":4,"g":["Action"]},{"id":1623730,"n":"Palworld","p":29.99,"c":18028,"y":2026,"t":3,"s":"i","b":2,"g":["Action","Adventure","Indie","RPG"]},{"id":1063730,"n":"New World: Aeternum","p":59.99,"c":5583,"y":2021,"t":1,"s":"n","b":4,"g":["Action","Adventure","Massively Multiplayer","RPG"]},{"id":105600,"n":"Terraria","p":9.99,"c":24580,"y":2011,"t":4,"s":"i","b":1,"g":["Action","Adventure","Indie","RPG"]},{"id":252490,"n":"Rust","p":39.99,"c":143870,"y":2018,"t":3,"s":"i","b":3,"g":["Action","Adventure","Indie","Massively Multiplayer","RPG"]},{"id":4000,"n":"Garry's Mod","p":9.99,"c":18400,"y":2006,"t":4,"s":"i","b":1,"g":["Casual","Indie","Simulation"]},{"id":1245620,"n":"ELDEN RING","p":59.99,"c":29529,"y":2022,"t":3,"s":"n","b":4,"g":["Action","RPG"]},{"id":553850,"n":"HELLDIVERS 2","p":39.99,"c":53399,"y":2024,"t":2,"s":"n","b":3,"g":["Action"]},{"id":431960,"n":"Wallpaper Engine","p":4.99,"c":91184,"y":2018,"t":4,"s":"i","b":1,"g":["Casual","Indie","Animation & Modeling","Design & Illustration","Photo Editing","Utilities"]},{"id":413150,"n":"Stardew Valley","p":14.99,"c":50662,"y":2016,"t":4,"s":"i","b":1,"g":["Indie","RPG","Simulation"]},{"id":1091500,"n":"Cyberpunk 2077","p":59.99,"c":22265,"y":2020,"t":3,"s":"n","b":4,"g":["RPG"]},{"id":292030,"n":"The Witcher 3: Wild Hunt","p":39.99,"c":15893,"y":2015,"t":4,"s":"n","b":3,"g":["RPG"]},{"id":381210,"n":"Dead by Daylight","p":19.99,"c":44886,"y":2016,"t":2,"s":"n","b":2,"g":["Action"]},{"id":1086940,"n":"Baldur's Gate 3","p":59.99,"c":54771,"y":2023,"t":4,"s":"n","b":4,"g":["Adventure","RPG","Strategy"]},{"id":346110,"n":"ARK: Survival Evolved","p":14.99,"c":22170,"y":2017,"t":3,"s":"i","b":1,"g":["Action","Adventure","Indie","Massively Multiplayer","RPG"]},{"id":945360,"n":"Among Us","p":4.99,"c":3832,"y":2018,"t":3,"s":"n","b":1,"g":["Casual"]},{"id":218620,"n":"PAYDAY 2","p":9.99,"c":27254,"y":2013,"t":3,"s":"n","b":1,"g":["Action","RPG"]},{"id":242760,"n":"The Forest","p":19.99,"c":2892,"y":2018,"t":4,"s":"i","b":2,"g":["Action","Adventure","Indie","Simulation"]},{"id":990080,"n":"Hogwarts Legacy","p":59.99,"c":5716,"y":2023,"t":3,"s":"n","b":4,"g":["Action","Adventure","RPG"]},{"id":2246340,"n":"Monster Hunter Wilds","p":69.99,"c":12494,"y":2025,"t":1,"s":"n","b":4,"g":["Action","Adventure","RPG"]},{"id":2694490,"n":"Path of Exile 2","p":29.99,"c":16727,"y":2024,"t":2,"s":"n","b":2,"g":["Action","Adventure","Massively Multiplayer","RPG","Early Access"]},{"id":899770,"n":"Last Epoch","p":34.99,"c":5831,"y":2024,"t":2,"s":"i","b":3,"g":["Action","Adventure","Indie","RPG"]},{"id":340,"n":"Half-Life 2: Lost Coast","p":19.99,"c":2,"y":2005,"t":3,"s":"n","b":2,"g":["Action"]},{"id":227300,"n":"Euro Truck Simulator 2","p":19.99,"c":17281,"y":2012,"t":4,"s":"i","b":2,"g":["Indie","Simulation"]},{"id":739630,"n":"Phasmophobia","p":19.99,"c":9978,"y":2020,"t":4,"s":"i","b":2,"g":["Action","Indie","Early Access"]},{"id":1174180,"n":"Red Dead Redemption 2","p":59.99,"c":29885,"y":2019,"t":3,"s":"n","b":4,"g":["Action","Adventure"]},{"id":892970,"n":"Valheim","p":19.99,"c":14439,"y":2021,"t":3,"s":"i","b":2,"g":["Action","Adventure","Indie","RPG","Early Access"]},{"id":322330,"n":"Don't Starve Together","p":14.99,"c":30542,"y":2016,"t":4,"s":"i","b":1,"g":["Action","Adventure","Indie","RPG","Simulation","Strategy"]},{"id":582010,"n":"Monster Hunter: World","p":29.99,"c":11923,"y":2018,"t":3,"s":"n","b":2,"g":["Action"]},{"id":1966720,"n":"Lethal Company","p":9.99,"c":6199,"y":2023,"t":4,"s":"i","b":1,"g":["Action","Adventure","Indie","Early Access"]},{"id":239140,"n":"Dying Light","p":24.99,"c":4953,"y":2015,"t":4,"s":"n","b":2,"g":["Action","Adventure","RPG"]},{"id":221100,"n":"DayZ","p":49.99,"c":37066,"y":2018,"t":2,"s":"n","b":3,"g":["Action","Adventure","Massively Multiplayer"]},{"id":377160,"n":"Fallout 4","p":19.99,"c":11179,"y":2015,"t":3,"s":"n","b":2,"g":["RPG"]},{"id":108600,"n":"Project Zomboid","p":19.99,"c":22864,"y":2013,"t":3,"s":"i","b":2,"g":["Indie","RPG","Simulation","Early Access"]},{"id":251570,"n":"7 Days to Die","p":44.99,"c":17045,"y":2024,"t":3,"s":"i","b":3,"g":["Action","Adventure","Indie","RPG","Simulation","Strategy"]},{"id":289070,"n":"Sid Meier's Civilization VI","p":59.99,"c":25420,"y":2016,"t":3,"s":"n","b":4,"g":["Strategy"]},{"id":648800,"n":"Raft","p":19.99,"c":4701,"y":2022,"t":3,"s":"i","b":2,"g":["Adventure","Indie","Simulation"]},{"id":814380,"n":"Sekiro: Shadows Die Twice - GOTY Edition","p":59.99,"c":6767,"y":2019,"t":4,"s":"n","b":4,"g":["Action","Adventure"]},{"id":1517290,"n":"Battlefield 2042","p":59.99,"c":2774,"y":2021,"t":1,"s":"n","b":4,"g":["Action","Adventure","Casual"]},{"id":49520,"n":"Borderlands 2","p":19.99,"c":8551,"y":2012,"t":3,"s":"n","b":2,"g":["Action","RPG"]},{"id":107410,"n":"Arma 3","p":29.99,"c":7181,"y":2013,"t":3,"s":"n","b":2,"g":["Action","Simulation","Strategy"]},{"id":255710,"n":"Cities: Skylines","p":29.99,"c":8842,"y":2015,"t":3,"s":"n","b":2,"g":["Simulation","Strategy"]},{"id":261550,"n":"Mount & Blade II: Bannerlord","p":49.99,"c":14477,"y":2022,"t":3,"s":"i","b":3,"g":["Action","Indie","RPG","Simulation","Strategy"]},{"id":1326470,"n":"Sons Of The Forest","p":29.99,"c":4450,"y":2024,"t":3,"s":"i","b":2,"g":["Action","Adventure","Indie","Simulation"]},{"id":1238810,"n":"Battlefield V","p":49.99,"c":6327,"y":2020,"t":2,"s":"n","b":3,"g":["Action"]},{"id":10,"n":"Counter-Strike","p":9.99,"c":7323,"y":2000,"t":4,"s":"n","b":1,"g":["Action"]},{"id":594650,"n":"Hunt: Showdown 1896","p":29.99,"c":6300,"y":2019,"t":2,"s":"n","b":2,"g":["Action"]},{"id":220,"n":"Half-Life 2","p":9.99,"c":1555,"y":2004,"t":4,"s":"n","b":1,"g":["Action"]},{"id":526870,"n":"Satisfactory","p":39.99,"c":12596,"y":2024,"t":4,"s":"i","b":3,"g":["Adventure","Indie","Simulation","Strategy"]},{"id":477160,"n":"Human Fall Flat","p":19.99,"c":950,"y":2016,"t":3,"s":"i","b":2,"g":["Adventure","Casual","Indie","Simulation"]},{"id":8930,"n":"Sid Meier's Civilization V","p":29.99,"c":12206,"y":2010,"t":4,"s":"n","b":2,"g":["Strategy"]},{"id":3164500,"n":"Schedule I","p":19.99,"c":22757,"y":2025,"t":4,"s":"i","b":2,"g":["Action","Indie","Simulation","Strategy","Early Access"]},{"id":3241660,"n":"R.E.P.O.","p":9.99,"c":32349,"y":2025,"t":4,"s":"n","b":1,"g":["Action","Early Access"]},{"id":240,"n":"Counter-Strike: Source","p":9.99,"c":6187,"y":2004,"t":4,"s":"n","b":1,"g":["Action"]},{"id":400,"n":"Portal","p":9.99,"c":638,"y":2007,"t":4,"s":"n","b":1,"g":["Action"]},{"id":70,"n":"Half-Life","p":9.99,"c":634,"y":1998,"t":4,"s":"n","b":1,"g":["Action"]},{"id":219990,"n":"Grim Dawn","p":24.99,"c":2376,"y":2016,"t":3,"s":"i","b":2,"g":["Action","Adventure","Indie","RPG"]},{"id":2186680,"n":"Warhammer 40,000: Rogue Trader","p":49.99,"c":3582,"y":2023,"t":3,"s":"i","b":3,"g":["Action","Adventure","Indie","RPG","Strategy"]},{"id":80,"n":"Counter-Strike: Condition Zero","p":9.99,"c":83,"y":2004,"t":3,"s":"n","b":1,"g":["Action"]},{"id":320,"n":"Half-Life 2: Deathmatch","p":19.99,"c":159,"y":2004,"t":3,"s":"n","b":2,"g":["Action"]},{"id":417910,"n":"Street Warriors Online","p":1.99,"c":1,"y":2016,"t":1,"s":"n","b":1,"g":["Action","Massively Multiplayer","Simulation","Sports"]},{"id":1116170,"n":"CyberCorp","p":14.99,"c":3,"y":2025,"t":3,"s":"i","b":1,"g":["Action","Adventure","Indie","RPG"]},{"id":620,"n":"Portal 2","p":9.99,"c":1959,"y":2011,"t":4,"s":"n","b":1,"g":["Action","Adventure"]},{"id":322170,"n":"Geometry Dash","p":4.99,"c":27850,"y":2014,"t":3,"s":"i","b":1,"g":["Action","Indie"]},{"id":367520,"n":"Hollow Knight","p":14.99,"c":4912,"y":2017,"t":4,"s":"i","b":1,"g":["Action","Adventure","Indie"]},{"id":374320,"n":"DARK SOULS III","p":59.99,"c":4381,"y":2016,"t":3,"s":"n","b":4,"g":["Action"]},{"id":1172620,"n":"Sea of Thieves: 2026 Edition","p":39.99,"c":5437,"y":2020,"t":3,"s":"n","b":3,"g":["Action","Adventure"]},{"id":275850,"n":"No Man's Sky","p":59.99,"c":12291,"y":2016,"t":3,"s":"n","b":4,"g":["Action","Adventure"]},{"id":250900,"n":"The Binding of Isaac: Rebirth","p":14.99,"c":14904,"y":2014,"t":4,"s":"n","b":1,"g":["Action"]},{"id":548430,"n":"Deep Rock Galactic","p":29.99,"c":5216,"y":2020,"t":4,"s":"n","b":2,"g":["Action"]},{"id":394360,"n":"Hearts of Iron IV","p":49.99,"c":32112,"y":2016,"t":3,"s":"n","b":3,"g":["Simulation","Strategy"]},{"id":489830,"n":"The Elder Scrolls V: Skyrim Special Edition","p":39.99,"c":25085,"y":2016,"t":3,"s":"n","b":3,"g":["RPG"]},{"id":284160,"n":"BeamNG.drive","p":24.99,"c":15863,"y":2015,"t":4,"s":"n","b":2,"g":["Racing","Simulation","Early Access"]},{"id":72850,"n":"The Elder Scrolls V: Skyrim","p":19.99,"c":1463,"y":2011,"t":3,"s":"n","b":2,"g":["RPG"]},{"id":264710,"n":"Subnautica","p":29.99,"c":2719,"y":2018,"t":4,"s":"i","b":2,"g":["Adventure","Indie"]},{"id":632360,"n":"Risk of Rain 2","p":24.99,"c":7902,"y":2020,"t":3,"s":"i","b":2,"g":["Action","Indie"]},{"id":1118200,"n":"People Playground","p":9.99,"c":4505,"y":2019,"t":4,"s":"i","b":1,"g":["Action","Casual","Indie","Simulation"]},{"id":1145360,"n":"Hades","p":24.99,"c":2253,"y":2020,"t":4,"s":"i","b":2,"g":["Action","Indie","RPG"]},{"id":391540,"n":"Undertale","p":9.99,"c":3331,"y":2015,"t":4,"s":"i","b":1,"g":["Indie","RPG"]},{"id":1237970,"n":"Titanfall 2","p":29.99,"c":1173,"y":2020,"t":4,"s":"n","b":2,"g":["Action"]},{"id":1794680,"n":"Vampire Survivors","p":4.99,"c":2966,"y":2022,"t":4,"s":"i","b":1,"g":["Action","Casual","Indie","RPG"]},{"id":203160,"n":"Tomb Raider Game of the Year","p":19.99,"c":556,"y":2013,"t":4,"s":"n","b":2,"g":["Action","Adventure"]},{"id":976730,"n":"Halo: The Master Chief Collection","p":39.99,"c":3362,"y":2019,"t":3,"s":"n","b":3,"g":["Action"]},{"id":1144200,"n":"Ready or Not","p":49.99,"c":4296,"y":2023,"t":3,"s":"i","b":3,"g":["Action","Adventure","Indie"]},{"id":22380,"n":"Fallout: New Vegas","p":9.99,"c":3892,"y":2010,"t":4,"s":"n","b":1,"g":["Action","RPG"]},{"id":1551360,"n":"Forza Horizon 5","p":59.99,"c":10009,"y":2021,"t":3,"s":"n","b":4,"g":["Action","Adventure","Racing","Simulation","Sports"]},{"id":1426210,"n":"It Takes Two","p":39.99,"c":5018,"y":2021,"t":4,"s":"n","b":3,"g":["Action","Adventure"]},{"id":427520,"n":"Factorio","p":35.0,"c":16426,"y":2020,"t":4,"s":"i","b":3,"g":["Casual","Indie","Simulation","Strategy"]},{"id":311210,"n":"Call of Duty: Black Ops III","p":59.99,"c":5414,"y":2015,"t":3,"s":"n","b":4,"g":["Action","Adventure"]},{"id":294100,"n":"RimWorld","p":34.99,"c":19211,"y":2018,"t":4,"s":"i","b":3,"g":["Indie","Simulation","Strategy"]},{"id":379720,"n":"DOOM","p":19.99,"c":1590,"y":2016,"t":4,"s":"n","b":2,"g":["Action"]},{"id":782330,"n":"DOOM Eternal","p":29.99,"c":2262,"y":2020,"t":3,"s":"n","b":2,"g":["Action"]},{"id":534380,"n":"Dying Light 2 Stay Human: Reloaded Edition","p":59.99,"c":4223,"y":2022,"t":2,"s":"n","b":4,"g":["Action","Adventure","RPG"]},{"id":1238840,"n":"Battlefield 1","p":39.99,"c":6308,"y":2020,"t":3,"s":"n","b":3,"g":["Action","Massively Multiplayer"]},{"id":435150,"n":"Divinity: Original Sin 2 - Definitive Edition","p":44.99,"c":3510,"y":2017,"t":4,"s":"n","b":3,"g":["Adventure","RPG","Strategy"]},{"id":268910,"n":"Cuphead","p":19.99,"c":2080,"y":2017,"t":4,"s":"i","b":2,"g":["Action","Indie"]},{"id":646570,"n":"Slay the Spire","p":24.99,"c":15038,"y":2019,"t":4,"s":"i","b":2,"g":["Indie","Strategy"]},{"id":2050650,"n":"Resident Evil 4","p":39.99,"c":3748,"y":2023,"t":4,"s":"n","b":3,"g":["Action","Adventure"]},{"id":518790,"n":"theHunter: Call of the Wild","p":19.99,"c":2207,"y":2017,"t":3,"s":"n","b":2,"g":["Adventure","Simulation","Sports"]},{"id":12210,"n":"Grand Theft Auto IV: The Complete Edition","p":19.99,"c":2122,"y":2020,"t":3,"s":"n","b":2,"g":["Action","Adventure"]},{"id":883710,"n":"Resident Evil 2","p":39.99,"c":1123,"y":2019,"t":4,"s":"n","b":3,"g":["Action"]},{"id":812140,"n":"Assassin's Creed Odyssey","p":59.99,"c":2629,"y":2018,"t":3,"s":"n","b":4,"g":["Action","Adventure","RPG"]},{"id":1229490,"n":"ULTRAKILL","p":29.99,"c":3122,"y":2020,"t":4,"s":"i","b":2,"g":["Action","Indie","Early Access"]},{"id":588650,"n":"Dead Cells","p":24.99,"c":2559,"y":2018,"t":4,"s":"i","b":2,"g":["Action","Adventure","Indie"]},{"id":48700,"n":"Mount & Blade: Warband","p":19.99,"c":3055,"y":2010,"t":4,"s":"n","b":2,"g":["Action","RPG"]},{"id":2183900,"n":"Warhammer 40,000: Space Marine 2","p":59.99,"c":6851,"y":2024,"t":3,"s":"n","b":4,"g":["Action","Adventure","RPG"]},{"id":1593500,"n":"God of War","p":49.99,"c":1380,"y":2022,"t":4,"s":"n","b":3,"g":["Action","Adventure","RPG"]},{"id":1332010,"n":"Stray","p":29.99,"c":498,"y":2022,"t":4,"s":"i","b":2,"g":["Adventure","Indie"]},{"id":306130,"n":"The Elder Scrolls Online","p":19.99,"c":15987,"y":2017,"t":3,"s":"n","b":2,"g":["Action","Adventure","Massively Multiplayer","RPG"]},{"id":244210,"n":"Assetto Corsa","p":19.99,"c":8961,"y":2014,"t":3,"s":"i","b":2,"g":["Indie","Racing","Simulation","Sports"]},{"id":304390,"n":"FOR HONOR","p":29.99,"c":2146,"y":2017,"t":1,"s":"n","b":2,"g":["Action"]},{"id":601150,"n":"Devil May Cry 5","p":29.99,"c":2248,"y":2019,"t":4,"s":"n","b":2,"g":["Action"]},{"id":2881650,"n":"Content Warning","p":7.99,"c":722,"y":2024,"t":3,"s":"i","b":1,"g":["Action","Adventure","Indie"]},{"id":671860,"n":"BattleBit Remastered","p":14.99,"c":568,"y":2023,"t":3,"s":"n","b":1,"g":["Action","Massively Multiplayer","Early Access"]},{"id":236850,"n":"Europa Universalis IV","p":49.99,"c":12445,"y":2013,"t":3,"s":"n","b":3,"g":["Simulation","Strategy"]},{"id":1868140,"n":"DAVE THE DIVER","p":19.99,"c":3367,"y":2023,"t":4,"s":"n","b":2,"g":["Adventure","Casual","RPG","Simulation"]},{"id":204360,"n":"Castle Crashers","p":14.99,"c":443,"y":2012,"t":4,"s":"i","b":1,"g":["Action","Adventure","Casual","Indie","RPG"]},{"id":594570,"n":"Total War: WARHAMMER II","p":59.99,"c":1464,"y":2017,"t":3,"s":"n","b":4,"g":["Action","Strategy"]},{"id":225540,"n":"Just Cause 3","p":19.99,"c":639,"y":2015,"t":3,"s":"n","b":2,"g":["Action","Adventure"]},{"id":1604030,"n":"V Rising","p":34.99,"c":10961,"y":2024,"t":3,"s":"n","b":3,"g":["Action","Adventure","Massively Multiplayer"]},{"id":223470,"n":"POSTAL 2","p":9.99,"c":320,"y":2012,"t":4,"s":"i","b":1,"g":["Action","Adventure","Indie"]},{"id":1446780,"n":"MONSTER HUNTER RISE","p":39.99,"c":3658,"y":2022,"t":3,"s":"n","b":3,"g":["Action"]},{"id":513710,"n":"SCUM","p":44.99,"c":8535,"y":2025,"t":2,"s":"i","b":3,"g":["Action","Adventure","Indie","Massively Multiplayer"]},{"id":286690,"n":"Metro 2033 Redux","p":19.99,"c":1208,"y":2014,"t":3,"s":"n","b":2,"g":["Action"]},{"id":424840,"n":"Little Nightmares","p":19.99,"c":222,"y":2017,"t":3,"s":"n","b":2,"g":["Adventure"]},{"id":231430,"n":"Company of Heroes 2","p":19.99,"c":2330,"y":2013,"t":2,"s":"n","b":2,"g":["Strategy"]},{"id":2195250,"n":"EA SPORTS FC 24","p":69.99,"c":5110,"y":2023,"t":1,"s":"n","b":4,"g":["Simulation","Sports"]},{"id":440900,"n":"Conan Exiles Enhanced","p":39.99,"c":5677,"y":2018,"t":2,"s":"n","b":3,"g":["Action","Adventure","Massively Multiplayer","RPG","Simulation","Strategy"]},{"id":779340,"n":"Total War: THREE KINGDOMS","p":39.99,"c":4507,"y":2019,"t":2,"s":"n","b":3,"g":["Action","Strategy"]},{"id":268500,"n":"XCOM 2","p":19.99,"c":3123,"y":2016,"t":3,"s":"n","b":2,"g":["Strategy"]},{"id":221380,"n":"Age of Empires II (Retired)","p":19.99,"c":2278,"y":2013,"t":4,"s":"n","b":2,"g":["Strategy"]},{"id":365590,"n":"Tom Clancy's The Division","p":29.99,"c":774,"y":2016,"t":2,"s":"n","b":2,"g":["Action","Adventure","RPG"]},{"id":241930,"n":"Middle-earth: Shadow of Mordor","p":19.99,"c":441,"y":2014,"t":3,"s":"u","b":2,"g":[]},{"id":582660,"n":"Black Desert","p":9.99,"c":14345,"y":2017,"t":2,"s":"n","b":1,"g":["Action","Adventure","Massively Multiplayer","RPG","Strategy"]},{"id":206420,"n":"Saints Row IV: Re-Elected","p":19.99,"c":117,"y":2013,"t":3,"s":"n","b":2,"g":["Action","Adventure"]},{"id":2669320,"n":"EA SPORTS FC 25","p":69.99,"c":42032,"y":2024,"t":1,"s":"n","b":4,"g":["Simulation","Sports"]},{"id":233450,"n":"Prison Architect","p":29.99,"c":781,"y":2015,"t":3,"s":"i","b":2,"g":["Indie","Simulation","Strategy"]},{"id":242050,"n":"Assassin's Creed IV Black Flag","p":39.99,"c":923,"y":null,"t":3,"s":"n","b":3,"g":["Action","Adventure"]},{"id":219640,"n":"Chivalry: Medieval Warfare","p":24.99,"c":32,"y":2012,"t":3,"s":"i","b":2,"g":["Action","Indie"]},{"id":500,"n":"Left 4 Dead","p":9.99,"c":774,"y":2008,"t":4,"s":"n","b":1,"g":["Action"]}],"bands":[{"k":1,"label":"Under $15","lo":0,"hi":15,"n":33,"counts":{"1":1,"2":1,"3":8,"4":23}},{"k":2,"label":"$15–29.99","lo":15,"hi":30,"n":57,"counts":{"1":1,"2":5,"3":29,"4":22}},{"k":3,"label":"$30–49.99","lo":30,"hi":50,"n":30,"counts":{"1":0,"2":7,"3":14,"4":9}},{"k":4,"label":"$50+","lo":50,"hi":70,"n":22,"counts":{"1":6,"2":1,"3":12,"4":3}}],"window":[2012,2024]};
 </script>
 <script>
 (() => {
@@ -252,19 +256,28 @@ window.STEAM_DATA = {"games":[{"id":2358720,"n":"Black Myth: Wukong","p":59.99,"
 
 /* ---------- data and constants ---------- */
 const D = window.STEAM_DATA;
-const games = D.games;                         // {id, n, p, c, y, t, g[]}
+const games = D.games;                         // {id, n, p, c, y, t, s, b, g[]}
 const YEARS = d3.range(D.window[0], D.window[1] + 1);
-const GENRES = D.genres;                       // fixed order: unfiltered median price, descending
-const PRICE_MAX = 70;                          // one price scale for Q1, Q2 and Q3
+const BANDS = D.bands;                         // cheapest first: {k, label, lo, hi}
+const PRICE_MAX = 70;                          // one price scale for charts 1 and 2
 const TIERS = [                                // dark to light, best tier first
   { k: 4, label: 'Overwhelmingly Positive', color: '#061b4d' },
   { k: 3, label: 'Very Positive', color: '#1c407a' },
   { k: 2, label: 'Mostly Positive', color: '#2f6aab' },
   { k: 1, label: 'Mixed', color: '#4396de' }
 ];
+const STUDIOS = [
+  { k: 'i', label: 'Indie', shape: d3.symbolCircle, size: 80 },
+  { k: 'n', label: 'Non-indie', shape: d3.symbolTriangle, size: 92 }
+];
+const NOT_RECORDED = { k: 'u', label: 'Genre not recorded', shape: d3.symbolSquare, size: 66 };
 const tierBy = new Map(TIERS.map(t => [t.k, t]));
+const studioBy = new Map(STUDIOS.concat([NOT_RECORDED]).map(s => [s.k, s]));
+const bandBy = new Map(BANDS.map(b => [b.k, b]));
+const BAND_PHRASE = { 1: 'under $15', 2: 'at $15–29.99', 3: 'at $30–49.99', 4: 'at $50 and up' };
 const C = { ink: '#111827', ink2: '#4b5563', muted: '#5f6673', grid: '#e5e7eb', axis: '#9aa1ad', ctx: '#c3c8d0', accent: '#C2500A' };
 const byId = new Map(games.map(g => [g.id, g]));
+const STORY = ['Stardew Valley', 'Call of Duty'].map(n => games.find(g => g.n === n)).filter(Boolean);   // the two named examples
 
 const usd = v => '$' + v.toFixed(2);
 const usd0 = v => '$' + Math.round(v);
@@ -273,32 +286,39 @@ const pct = v => Math.round(v * 100) + '%';
 const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---------- state ---------- */
-const state = { tiers: new Set([1, 2, 3, 4]), genre: null, year: null, game: null, hover: null };
+const state = { tiers: new Set([1, 2, 3, 4]), studios: new Set(['i', 'n']), band: null, year: null, game: null, hover: null };
 // A hover or keyboard focus acts as a temporary selection; a click or Enter/Space keeps it.
 function eff() {
   const h = state.hover || {};
   return {
-    genre: h.genre !== undefined ? h.genre : state.genre,
+    band: h.band !== undefined ? h.band : state.band,
     year: h.year !== undefined ? h.year : state.year,
     game: h.game !== undefined ? h.game : state.game
   };
 }
-const visible = () => games.filter(g => state.tiers.has(g.t));
+const studioOK = g => g.s === 'u' ? state.studios.size === STUDIOS.length : state.studios.has(g.s);
+const visible = () => games.filter(g => state.tiers.has(g.t) && studioOK(g));
 const inWindow = g => g.y !== null && g.y >= YEARS[0] && g.y <= YEARS[YEARS.length - 1];
-const inFocus = (g, e) => (!e.genre || g.g.includes(e.genre)) && (e.year === null || g.y === e.year);
+const inFocus = (g, e) => (e.band === null || g.b === e.band) && (e.year === null || g.y === e.year);
+const anyFocus = e => e.band !== null || e.year !== null;
 
 function yearStats(list) {
   const m = d3.rollup(list.filter(inWindow),
     v => ({ n: v.length, median: d3.median(v, d => d.p), mean: d3.mean(v, d => d.p) }), d => d.y);
   return YEARS.map(y => Object.assign({ year: y, n: 0, median: null, mean: null }, m.get(y)));
 }
-function genreStats(list) {
-  return GENRES.map(G => {
-    const v = list.filter(g => g.g.includes(G.name));
-    return { name: G.name, n: v.length, median: v.length ? d3.median(v, d => d.p) : null, mean: v.length ? d3.mean(v, d => d.p) : null };
+// Review shares per band are taken over the games the Developer filter keeps; a hidden tier stays in the
+// total and is drawn hollow, so each bar still shows the whole band.
+function bandStats() {
+  const base = games.filter(studioOK);
+  return BANDS.map(b => {
+    const v = base.filter(g => g.b === b.k), n = v.length;
+    const counts = Object.fromEntries(TIERS.map(t => [t.k, v.filter(g => g.t === t.k).length]));
+    return { k: b.k, label: b.label, n, counts, share: k => n ? counts[k] / n : 0,
+      median: n ? d3.median(v, d => d.p) : null, players: n ? d3.median(v, d => d.c) : null, indie: v.filter(g => g.s === 'i').length };
   });
 }
-// Pearson r between list price and log10(peak players), the two plotted positions in Q2.
+// Pearson r between list price and log10(peak players), the two plotted positions in chart 2.
 function pearson(list) {
   if (list.length < 3) return null;
   const x = list.map(d => d.p), y = list.map(d => Math.log10(d.c));
@@ -311,6 +331,9 @@ function pearson(list) {
 /* ---------- small DOM helpers ---------- */
 function el(tag, cls, text) { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; }
 const $ = id => document.getElementById(id);
+// Selection notes sit on lines of fixed height, so pointing at a mark never shifts the layout.
+function setNote(id, text) { const n = $(id); n.textContent = text; n.title = text; }
+const shapePath = (s, scale = 1) => d3.symbol(studioBy.get(s).shape, studioBy.get(s).size * scale)();
 
 /* ---------- tooltip ---------- */
 const tip = $('tip');
@@ -333,8 +356,6 @@ function showTip(content, owner) {
   tip.hidden = false; tipOwner = owner || null;
 }
 function hideTip() { tip.hidden = true; tipOwner = null; }
-// Selection notes sit on lines of fixed height, so pointing at a mark never shifts the layout.
-function setNote(id, text) { const n = $(id); n.textContent = text; n.title = text; }
 function placeTip(x, y, avoid) {
   const r = tip.getBoundingClientRect(), W = window.innerWidth, H = window.innerHeight;
   let left = x + 14, top = y + 14;
@@ -346,8 +367,7 @@ const moveTip = ev => placeTip(ev.clientX, ev.clientY);
 function anchorTip(node) { const b = node.getBoundingClientRect(); placeTip(b.right - 6, b.top - 6, b); }
 
 /* ---------- shared interaction wiring ---------- */
-let lastPointer = 'mouse';
-let pointerFocus = false;
+let lastPointer = 'mouse', pointerFocus = false;
 window.addEventListener('pointerdown', ev => { lastPointer = ev.pointerType || 'mouse'; pointerFocus = true; setTimeout(() => { pointerFocus = false; }, 0); }, true);
 
 // Every interactive mark gets the same four routes: hover, keyboard focus, click/tap and Enter/Space.
@@ -387,11 +407,11 @@ function ensureTabStop(nodes) {
 const toggle = (key, value) => { state[key] = state[key] === value ? null : value; };
 const pinNote = on => on ? 'Selected. Click or press Enter again to clear.' : 'Click or press Enter to keep this selection.';
 
-/* ---------- tier legend (also the filter) ---------- */
+/* ---------- legend buttons (they are also the filters) ---------- */
 function initLegend() {
-  const box = $('tierButtons');
+  const tb = $('tierButtons');
   TIERS.forEach(t => {
-    const b = el('button', 'tier'); b.type = 'button'; b.id = 'tier' + t.k; b.dataset.k = t.k;
+    const b = el('button', 'tier'); b.type = 'button'; b.id = 'tier' + t.k;
     const sw = el('span', 'sw'); sw.style.background = t.color;
     b.appendChild(sw); b.appendChild(el('span', 'lb', t.label));
     b.appendChild(el('span', 'ct', String(games.filter(g => g.t === t.k).length)));
@@ -400,15 +420,31 @@ function initLegend() {
       else state.tiers.add(t.k);
       render(true);
     });
-    box.appendChild(b);
+    tb.appendChild(b);
+  });
+  const sb = $('studioButtons');
+  STUDIOS.forEach(s => {
+    const b = el('button', 'tier'); b.type = 'button'; b.id = 'studio' + s.k;
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'shp'); svg.setAttribute('viewBox', '-7 -7 14 14'); svg.setAttribute('aria-hidden', 'true');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); path.setAttribute('d', d3.symbol(s.shape, s.size * 0.75)());
+    svg.appendChild(path); b.appendChild(svg);
+    b.appendChild(el('span', 'lb', s.label));
+    b.appendChild(el('span', 'ct', String(games.filter(g => g.s === s.k).length)));
+    b.addEventListener('click', () => {
+      if (state.studios.has(s.k)) { state.studios.delete(s.k); if (!state.studios.size) STUDIOS.forEach(x => state.studios.add(x.k)); }
+      else state.studios.add(s.k);
+      render(true);
+    });
+    sb.appendChild(b);
   });
   $('reset').addEventListener('click', () => {
-    TIERS.forEach(x => state.tiers.add(x.k));
-    state.genre = state.year = state.game = null; state.hover = null; hideTip(); render(true);
+    TIERS.forEach(x => state.tiers.add(x.k)); STUDIOS.forEach(x => state.studios.add(x.k));
+    state.band = state.year = state.game = null; state.hover = null; hideTip(); render(true);
   });
   window.addEventListener('keydown', ev => {
-    if (ev.key === 'Escape' && (state.genre || state.year !== null || state.game !== null)) {
-      state.genre = state.year = state.game = null; hideTip(); render();
+    if (ev.key === 'Escape' && (state.band !== null || state.year !== null || state.game !== null)) {
+      state.band = state.year = state.game = null; hideTip(); render();
     }
   });
 }
@@ -416,24 +452,29 @@ function renderLegend() {
   TIERS.forEach(t => {
     const b = $('tier' + t.k), on = state.tiers.has(t.k);
     b.setAttribute('aria-pressed', on ? 'true' : 'false');
-    b.title = on ? 'Hide ' + t.label + ' games' : 'Show ' + t.label + ' games';
+    b.title = (on ? 'Hide ' : 'Show ') + t.label + ' games';
+  });
+  STUDIOS.forEach(s => {
+    const b = $('studio' + s.k), on = state.studios.has(s.k);
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    b.title = (on ? 'Hide ' : 'Show ') + s.label.toLowerCase() + ' games';
   });
 }
 
-/* ---------- Q1: line chart ---------- */
+/* ---------- Chart 1: line chart (Q1) ---------- */
 const L = {};
 function initLine() {
   const svg = d3.select('#c1').append('svg').attr('role', 'group')
     .attr('aria-label', 'Line chart of median and mean list price of paid games by release year, 2012 to 2024');
-  L.svg = svg; L.g = svg.append('g');
+  L.g = svg.append('g');
   L.grid = L.g.append('g').attr('aria-hidden', 'true');
   L.band = L.g.append('g').attr('aria-hidden', 'true');
-  L.xAxis = L.g.append('g').attr('class', 'axis').attr('aria-hidden', 'true');
-  L.yAxis = L.g.append('g').attr('class', 'axis').attr('aria-hidden', 'true');
+  L.xAxis = L.g.append('g').attr('aria-hidden', 'true');
+  L.yAxis = L.g.append('g').attr('aria-hidden', 'true');
   L.titles = L.g.append('g').attr('aria-hidden', 'true');
   L.nrow = L.g.append('g').attr('class', 'n').attr('aria-hidden', 'true');
-  L.ctx = L.g.append('g').attr('aria-hidden', 'true');
   L.focus = L.g.append('g').attr('aria-hidden', 'true');
+  L.bandDots = L.g.append('g').attr('aria-hidden', 'true');
   L.labels = L.g.append('g').attr('class', 'ink').attr('aria-hidden', 'true');
   L.anno = L.g.append('g').attr('aria-hidden', 'true');
   L.marker = L.g.append('g').attr('aria-hidden', 'true');
@@ -449,32 +490,26 @@ function initLine() {
     pin: y => toggle('year', y),
     nodes: () => hits.nodes(),
     tip: y => {
-      const e = eff(), F = visible(), all = yearStats(F).find(s => s.year === y);
-      const row = s => s.n ? [{ k: 'Median', v: usd(s.median) }, { k: 'Mean', v: usd(s.mean) }, { k: 'Games', v: String(s.n) }] : [{ k: 'Games', v: '0' }];
-      const sections = [];
-      if (e.genre) sections.push({ head: e.genre, rows: row(yearStats(F.filter(g => g.g.includes(e.genre))).find(s => s.year === y)) });
-      sections.push({ head: e.genre ? 'All paid games' : undefined, rows: row(all) });
-      return { title: 'Released in ' + y, sections, note: pinNote(state.year === y) };
+      const s = yearStats(visible()).find(d => d.year === y);
+      const rows = s.n ? [{ k: 'Median', v: usd(s.median) }, { k: 'Mean', v: usd(s.mean) }, { k: 'Games', v: String(s.n) }] : [{ k: 'Games', v: '0' }];
+      if (s.n) rows.push({ k: 'Priced $50 and up', v: String(visible().filter(g => g.y === y && g.b === 4).length) });
+      return { title: 'Released in ' + y, rows, note: pinNote(state.year === y) };
     }
   });
   ensureTabStop(hits.nodes());
 }
-function drawSeries(g, stats, x, y, col, strong) {
+function drawSeries(g, stats, x, y) {
   const line = key => d3.line().defined(d => d[key] !== null).x(d => x(d.year)).y(d => y(d[key]));
-  const spec = [
-    { key: 'median', dash: null, w: strong ? 2.5 : 2 },
-    { key: 'mean', dash: '6 4', w: strong ? 2 : 1.75 }
-  ];
-  g.selectAll('path.ln').data(stats ? spec : [], d => d.key).join('path').attr('class', 'ln')
-    .attr('fill', 'none').attr('stroke', col).attr('stroke-width', d => d.w).attr('stroke-dasharray', d => d.dash)
+  const spec = [{ key: 'median', dash: null, w: 2.5 }, { key: 'mean', dash: '6 4', w: 2 }];
+  g.selectAll('path.ln').data(spec, d => d.key).join('path').attr('class', 'ln')
+    .attr('fill', 'none').attr('stroke', C.ink).attr('stroke-width', d => d.w).attr('stroke-dasharray', d => d.dash)
     .attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round').attr('d', d => line(d.key)(stats));
-  const pts = stats ? stats.filter(d => d.n > 0) : [];
-  const r = strong ? 4 : 3;
-  g.selectAll('circle.mk').data(pts, d => d.year).join('circle').attr('class', 'mk')   // median: circles
-    .attr('r', r).attr('cx', d => x(d.year)).attr('cy', d => y(d.median)).attr('fill', col).attr('stroke', '#fff').attr('stroke-width', 1.25);
-  g.selectAll('rect.mk').data(pts, d => d.year).join('rect').attr('class', 'mk')       // mean: squares
-    .attr('width', 2 * r - 1).attr('height', 2 * r - 1).attr('x', d => x(d.year) - r + 0.5).attr('y', d => y(d.mean) - r + 0.5)
-    .attr('fill', '#fff').attr('stroke', col).attr('stroke-width', 1.75);
+  const pts = stats.filter(d => d.n > 0);
+  g.selectAll('circle.mk').data(pts, d => d.year).join('circle').attr('class', 'mk')     // median: circles
+    .attr('r', 4).attr('cx', d => x(d.year)).attr('cy', d => y(d.median)).attr('fill', C.ink).attr('stroke', '#fff').attr('stroke-width', 1.25);
+  g.selectAll('rect.mk').data(pts, d => d.year).join('rect').attr('class', 'mk')         // mean: squares
+    .attr('width', 7).attr('height', 7).attr('x', d => x(d.year) - 3.5).attr('y', d => y(d.mean) - 3.5)
+    .attr('fill', '#fff').attr('stroke', C.ink).attr('stroke-width', 1.75);
 }
 function renderLine(F, e) {
   const box = $('c1'), W = box.clientWidth, H = box.clientHeight;
@@ -482,37 +517,31 @@ function renderLine(F, e) {
   L.g.attr('transform', `translate(${m.l},${m.t})`);
   const x = d3.scalePoint().domain(YEARS).range([0, w]).padding(0.5);
   const y = d3.scaleLinear().domain([0, PRICE_MAX]).range([h, 0]);
-  L.x = x; L.y = y;
-  const step = x.step();
+  const step = x.step(), every = w < 330 ? 4 : 2;
 
   L.grid.selectAll('line').data(y.ticks(7)).join('line').attr('x1', 0).attr('x2', w).attr('y1', d => y(d)).attr('y2', d => y(d))
-    .attr('stroke', d => d === 0 ? C.axis : C.grid).attr('stroke-width', 1);
+    .attr('stroke', d => d === 0 ? C.axis : C.grid);
   L.yAxis.call(d3.axisLeft(y).ticks(7).tickSize(0).tickPadding(7).tickFormat(usd0)).call(g => g.select('.domain').remove());
-  L.xAxis.attr('transform', `translate(0,${h})`)
-    .call(d3.axisBottom(x).tickSize(4).tickPadding(5).tickFormat(d => (w < 330 ? d % 4 === 0 : d % 2 === 0) ? d : ''))
+  L.xAxis.attr('transform', `translate(0,${h})`).call(d3.axisBottom(x).tickSize(4).tickPadding(5))
     .call(g => g.select('.domain').remove()).call(g => g.selectAll('.tick line').attr('stroke', C.axis));
   L.xAxis.selectAll('.tick text').attr('font-weight', d => d === e.year ? 700 : 400).attr('fill', d => d === e.year ? C.ink : C.ink2)
     .text(d => {
       if (d === e.year) return d;
-      if (e.year !== null && Math.abs(d - e.year) < (w < 330 ? 3 : 2)) return '';
-      return (w < 330 ? d % 4 === 0 : d % 2 === 0) ? d : '';
+      if (e.year !== null && Math.abs(d - e.year) < every) return '';
+      return d % every === 0 ? d : '';
     });
   L.titles.select('.ytitle').attr('x', -m.l).attr('y', -9);
   L.titles.select('.xtitle').attr('x', w / 2).attr('y', h + 56);
 
-  const all = yearStats(F);
-  const sel = e.genre ? yearStats(F.filter(g => g.g.includes(e.genre))) : null;
-  const focus = sel || all;
-  drawSeries(L.ctx, sel ? all : null, x, y, C.ctx, false);
-  drawSeries(L.focus, focus, x, y, sel ? C.accent : C.ink, true);
+  const stats = yearStats(F);
+  drawSeries(L.focus, stats, x, y);
 
-  // sample size under every year: the number of games behind each point
   L.nrow.select('.nlab').attr('x', -8).attr('y', h + 36).text('n =');
-  L.nrow.selectAll('text.nv').data(focus, d => d.year).join('text').attr('class', 'nv').attr('text-anchor', 'middle')
+  L.nrow.selectAll('text.nv').data(stats, d => d.year).join('text').attr('class', 'nv').attr('text-anchor', 'middle')
     .attr('x', d => x(d.year)).attr('y', h + 36).attr('fill', C.muted).attr('font-size', 11).text(d => d.n);
 
   // direct labels at the line ends instead of a legend
-  const last = focus.filter(d => d.n > 0).slice(-1)[0];
+  const last = stats.filter(d => d.n > 0).slice(-1)[0];
   let labs = [];
   if (last) {
     labs = [{ key: 'Median', v: last.median }, { key: 'Mean', v: last.mean }].map(d => ({ key: d.key, y: y(d.v) }));
@@ -521,72 +550,75 @@ function renderLine(F, e) {
   L.labels.selectAll('text').data(labs, d => d.key).join('text').attr('x', last ? x(last.year) + 9 : 0).attr('y', d => d.y).attr('dy', '0.35em')
     .attr('font-size', 12).attr('font-weight', 600).attr('fill', C.ink).text(d => d.key);
 
-  // annotation: warn when the highest point rests on very few games
-  const peak = focus.filter(d => d.n > 0).sort((a, b) => b.median - a.median)[0];
-  const showAnno = peak && !sel && peak.n <= 5 && e.year === null && e.game === null;
-  L.anno.selectAll('text').data(showAnno ? [peak] : []).join('text').attr('text-anchor', 'middle').attr('font-size', 11.5).attr('fill', C.ink2)
+  // annotation: the highest point rests on very few games
+  const peak = stats.filter(d => d.n > 0).sort((a, b) => b.median - a.median)[0];
+  const showAnno = peak && peak.n <= 5 && !anyFocus(e) && e.game === null;
+  L.anno.selectAll('text').data(showAnno ? [peak] : []).join('text').attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', C.ink2)
     .attr('x', d => Math.max(60, Math.min(w - 50, x(d.year)))).attr('y', d => Math.max(4, y(Math.max(d.median, d.mean)) - 11))
     .text(d => `Only ${d.n} game${d.n === 1 ? '' : 's'} in ${d.year}`);
 
-  // linked marks: selected year band, and the selected game placed at (its year, its price)
-  L.band.selectAll('rect').data(e.year !== null && YEARS.includes(e.year) ? [e.year] : []).join('rect')
+  // linked marks: the selected price band as a horizontal strip plus its games, the selected year, the selected game
+  const bd = e.band !== null ? bandBy.get(e.band) : null;
+  L.band.selectAll('rect.pb').data(bd ? [bd] : []).join('rect').attr('class', 'pb')
+    .attr('x', 0).attr('width', w).attr('y', d => y(d.hi)).attr('height', d => y(d.lo) - y(d.hi)).attr('fill', C.accent).attr('opacity', 0.08);
+  L.band.selectAll('rect.yr').data(e.year !== null && YEARS.includes(e.year) ? [e.year] : []).join('rect').attr('class', 'yr')
     .attr('x', d => x(d) - step / 2).attr('width', step).attr('y', 0).attr('height', h).attr('fill', C.accent).attr('opacity', 0.1);
+  const bandGames = bd ? F.filter(g => g.b === bd.k && inWindow(g)) : [];
+  L.bandDots.selectAll('circle').data(bandGames, d => d.id).join('circle').attr('r', 3.5)
+    .attr('cx', d => x(d.y) + (((d.id * 7919) % 9) - 4) * Math.min(1.2, step / 14)).attr('cy', d => y(d.p))
+    .attr('fill', C.accent).attr('fill-opacity', 0.85).attr('stroke', '#fff').attr('stroke-width', 1);
   const gm = e.game !== null ? byId.get(e.game) : null;
-  L.marker.selectAll('path').data(gm && inWindow(gm) && state.tiers.has(gm.t) ? [gm] : []).join('path')
+  L.marker.selectAll('path').data(gm && inWindow(gm) && F.includes(gm) ? [gm] : []).join('path')
     .attr('d', d3.symbol(d3.symbolDiamond, 90)()).attr('transform', d => `translate(${x(d.y)},${y(d.p)})`)
     .attr('fill', '#fff').attr('stroke', C.accent).attr('stroke-width', 2.5);
 
   L.hit.selectAll('g').each(function (yr) {
-    const s = focus.find(d => d.year === yr), g = d3.select(this);
+    const s = stats.find(d => d.year === yr), g = d3.select(this);
     g.attr('aria-pressed', state.year === yr ? 'true' : 'false')
-      .attr('aria-label', `${yr}: ` + (s.n ? `median ${usd(s.median)}, mean ${usd(s.mean)}, ${s.n} games` : 'no games') + '. Press Enter to highlight these games in the scatterplot.');
+      .attr('aria-label', `${yr}: ` + (s.n ? `median ${usd(s.median)}, mean ${usd(s.mean)}, ${s.n} games` : 'no games') + '. Press Enter to highlight these games in chart 2.');
     g.select('.hitrect').attr('x', x(yr) - step / 2).attr('width', step).attr('y', -6).attr('height', h + 46);
     g.select('.fr').attr('x', x(yr) - step / 2 + 1).attr('width', step - 2).attr('y', -6).attr('height', h + 46);
   });
 
-  // insight title, computed from the data on screen
-  const withData = all.filter(d => d.n > 0);
+  const withData = stats.filter(d => d.n > 0);
   let title = 'No games match the current filter';
   if (withData.length >= 2) {
-    const a = withData[0], b = withData[withData.length - 1];
-    const verb = b.median > a.median ? 'rose' : b.median < a.median ? 'fell' : 'held';
-    title = verb === 'held' ? `Median list price was ${usd(a.median)} in both ${a.year} and ${b.year}`
-      : `Median list price ${verb} from ${usd(a.median)} in ${a.year} to ${usd(b.median)} in ${b.year}`;
+    const a = withData[0], b = withData[withData.length - 1], ratio = b.median / a.median;
+    const verb = ratio >= 1.9 && ratio <= 2.1 ? 'doubled' : ratio > 2.1 ? `rose ${ratio.toFixed(1)}-fold` : ratio > 1 ? 'rose' : ratio < 1 ? 'fell' : 'held';
+    title = verb === 'held' ? `Median list price held at ${usd(a.median)} from ${a.year} to ${b.year}`
+      : `Median list price ${verb}, from ${usd(a.median)} in ${a.year} to ${usd(b.median)} in ${b.year}`;
   }
   $('t1').textContent = title;
   $('d1').textContent = 'Median (solid line, circles) and mean (dashed line, squares) list price of paid games by release year.';
   const note = [];
-  if (sel) {
-    const nAll = F.filter(g => g.g.includes(e.genre)).length, nIn = d3.sum(sel, d => d.n);
-    note.push(`Orange lines: ${e.genre} only (${nIn} of its ${nAll} games were released in 2012–2024). Grey: all paid games.`);
-  }
+  if (bd) note.push(`Orange: the ${bandGames.length} games priced ${bd.label === '$50+' ? '$50 and up' : bd.label.replace('Under', 'under')}.`);
   if (e.year !== null) note.push(`Shaded: ${e.year}.`);
-  if (gm && state.tiers.has(gm.t)) note.push(inWindow(gm) ? `Diamond: ${gm.n} (${gm.y}, ${usd(gm.p)}).` : `${gm.n} (${gm.y === null ? 'year not recorded' : gm.y}) is outside this chart.`);
+  if (gm && F.includes(gm)) note.push(inWindow(gm) ? `Diamond: ${gm.n} (${gm.y}, ${usd(gm.p)}).` : `${gm.n} (${gm.y === null ? 'year not recorded' : gm.y}) is outside this chart.`);
   setNote('s1', note.join(' '));
 }
 
-/* ---------- Q2: scatterplot ---------- */
+/* ---------- Chart 2: scatterplot (Q2) ---------- */
 const S = {};
 function initScatter() {
   const svg = d3.select('#c2').append('svg').attr('role', 'group')
-    .attr('aria-label', 'Scatterplot of list price against peak concurrent players, one dot per paid game, coloured by review tier');
-  S.svg = svg; S.g = svg.append('g');
+    .attr('aria-label', 'Scatterplot of list price against peak concurrent players, one mark per paid game, coloured by review tier, circle for indie and triangle for non-indie');
+  S.g = svg.append('g');
+  S.band = S.g.append('g').attr('aria-hidden', 'true');
   S.grid = S.g.append('g').attr('aria-hidden', 'true');
   S.xAxis = S.g.append('g').attr('aria-hidden', 'true');
   S.yAxis = S.g.append('g').attr('aria-hidden', 'true');
   S.titles = S.g.append('g').attr('aria-hidden', 'true');
   S.titles.append('text').attr('class', 'ytitle').text('Peak concurrent players (log scale)');
   S.titles.append('text').attr('class', 'xtitle').attr('text-anchor', 'middle').text('List price (US$)');
-  S.hitLayer = S.g.append('g').attr('aria-hidden', 'true');
-  S.pts = S.g.append('g');
+  S.pts = S.g.append('g').style('pointer-events', 'none');      // marks take keyboard focus; the pointer goes to the catcher below
   S.over = S.g.append('g').attr('class', 'ink').attr('aria-hidden', 'true').style('pointer-events', 'none');
+  S.catcher = S.g.append('rect').attr('class', 'catcher').attr('fill', 'transparent').attr('aria-hidden', 'true');
   S.order = games.slice().sort((a, b) => a.p - b.p || a.c - b.c);
   const pts = S.pts.selectAll('g').data(S.order, d => d.id).join('g').attr('role', 'button').attr('tabindex', -1);
-  S.hit = S.hitLayer.selectAll('circle').data(S.order, d => d.id).join('circle').attr('r', 12).attr('fill', 'transparent').style('cursor', 'pointer');
-  pts.append('circle').attr('class', 'dot').attr('r', 5).attr('stroke', '#fff').attr('stroke-width', 1.25);
-  pts.append('circle').attr('class', 'fr').attr('r', 9);
+  pts.append('path').attr('class', 'dot').attr('stroke', '#fff').attr('stroke-width', 1.25);
+  pts.append('circle').attr('class', 'fr').attr('r', 10);
   S.sel = pts;
-  S.nodes = () => pts.filter(d => state.tiers.has(d.t)).nodes();
+  S.nodes = () => pts.filter(d => state.tiers.has(d.t) && studioOK(d)).nodes();
   const cfg = {
     hover: d => ({ game: d.id }),
     pin: d => toggle('game', d.id),
@@ -594,17 +626,42 @@ function initScatter() {
     tip: d => ({
       title: d.n,
       rows: [
-        { k: 'List price', v: usd(d.p) },
+        { k: 'List price', v: usd(d.p) + ' · ' + bandBy.get(d.b).label },
         { k: 'Peak players', v: int(d.c) },
-        { k: 'Released', v: d.y === null ? 'not recorded' : String(d.y) },
         { k: 'Reviews', v: tierBy.get(d.t).label, sw: tierBy.get(d.t).color },
-        { k: 'Genres', v: d.g.length ? d.g.join(', ') : 'not recorded' }
+        { k: 'Released', v: d.y === null ? 'not recorded' : String(d.y) },
+        { k: 'Developer', v: studioBy.get(d.s).label }
       ],
-      note: (d.y !== null && !inWindow(d) ? 'Outside the 2012–2024 price chart. ' : '') + pinNote(state.game === d.id)
+      note: (d.y !== null && !inWindow(d) ? 'Outside the 2012–2024 range of chart 1. ' : '') + pinNote(state.game === d.id)
     })
-   };
+  };
   wire(pts, cfg);
-  wire(S.hit, cfg);      // pointer only: the circles are not focusable
+  // Nearest-mark picking: in crowded columns marks overlap, so the pointer selects the game whose centre is
+  // closest (within 14px) instead of whichever mark happens to be drawn on top.
+  const nearest = ev => {
+    const [mx, my] = d3.pointer(ev, S.g.node()); let best = null, bd = 14 * 14;
+    for (const g of games) {
+      if (!(state.tiers.has(g.t) && studioOK(g))) continue;
+      const q = S.pos.get(g.id), d2 = (q.x - mx) ** 2 + (q.y - my) ** 2;
+      if (d2 < bd) { bd = d2; best = g; }
+    }
+    return best;
+  };
+  const node = S.catcher.node();
+  S.catcher
+    .on('pointermove', ev => {
+      if (ev.pointerType === 'touch') return;
+      const g = nearest(ev); node.style.cursor = g ? 'pointer' : 'default';
+      const cur = state.hover && state.hover.game;
+      if (g) { if (cur !== g.id) { state.hover = { game: g.id }; render(); showTip(cfg.tip(g), node); } moveTip(ev); }
+      else if (cur !== undefined && cur !== null) { state.hover = null; render(); if (tipOwner === node) hideTip(); }
+    })
+    .on('pointerleave', () => { if (state.hover && state.hover.game !== undefined) { state.hover = null; render(); } if (tipOwner === node) hideTip(); })
+    .on('click', ev => {
+      const g = nearest(ev); if (!g) return;
+      cfg.pin(g); render(); showTip(cfg.tip(g), node);
+      if (lastPointer === 'touch') placeTip(ev.clientX, ev.clientY); else moveTip(ev);
+    });
 }
 // Games that share a price are nudged sideways until they stop overlapping (systematic jitter).
 function dodge(list, r, maxOff) {
@@ -643,213 +700,209 @@ function renderScatter(F, e) {
     S.key = key;
     S.pos = dodge(games.map(g => ({ id: g.id, x0: x(g.p), y: y(g.c) })), 5, Math.min(12, x(2.6) - x(0)));
   }
-  const any = !!e.genre || e.year !== null;
-  S.hit.attr('cx', d => S.pos.get(d.id).x).attr('cy', d => S.pos.get(d.id).y).style('display', d => state.tiers.has(d.t) ? null : 'none');
+  const bd = e.band !== null ? bandBy.get(e.band) : null;
+  S.band.selectAll('rect').data(bd ? [bd] : []).join('rect').attr('x', d => x(d.lo)).attr('width', d => x(Math.min(PRICE_MAX, d.hi)) - x(d.lo))
+    .attr('y', 0).attr('height', h).attr('fill', C.accent).attr('opacity', 0.08);
+
+  const any = anyFocus(e), shown = d => state.tiers.has(d.t) && studioOK(d), lit = d => !any || inFocus(d, e);
+  S.catcher.attr('x', -8).attr('y', -8).attr('width', w + 16).attr('height', h + 16);
   S.sel.attr('transform', d => { const p = S.pos.get(d.id); return `translate(${p.x},${p.y})`; })
-    .style('display', d => state.tiers.has(d.t) ? null : 'none')
+    .style('display', d => shown(d) ? null : 'none')
     .attr('aria-pressed', d => state.game === d.id ? 'true' : 'false')
-    .attr('aria-label', d => `${d.n}: ${usd(d.p)}, ${int(d.c)} peak players, ${d.y === null ? 'release year not recorded' : 'released ' + d.y}, ${tierBy.get(d.t).label}.`);
+    .attr('aria-label', d => `${d.n}: ${usd(d.p)}, ${int(d.c)} peak players, ${tierBy.get(d.t).label}, ${studioBy.get(d.s).label.toLowerCase()}, ${d.y === null ? 'release year not recorded' : 'released ' + d.y}.`);
   S.sel.select('.dot')
-    .attr('fill', d => !any || inFocus(d, e) ? tierBy.get(d.t).color : C.ctx)
-    .attr('r', d => !any || inFocus(d, e) ? 5 : 3.5)
-    .attr('opacity', d => !any || inFocus(d, e) ? 1 : 0.75);
-  S.sel.each(function (d) { if (!state.tiers.has(d.t)) this.setAttribute('tabindex', '-1'); });
+    .attr('d', d => shapePath(d.s, lit(d) ? 1 : 0.5))
+    .attr('fill', d => lit(d) ? tierBy.get(d.t).color : C.ctx)
+    .attr('opacity', d => lit(d) ? 1 : 0.75);
+  S.sel.each(function (d) { if (!shown(d)) this.setAttribute('tabindex', '-1'); });
   ensureTabStop(S.nodes());
 
-  // overlay: ring on the selected game and a direct label on the busiest game
-  const gm = e.game !== null && state.tiers.has(byId.get(e.game).t) ? byId.get(e.game) : null;
-  S.over.selectAll('circle').data(gm ? [gm] : []).join('circle').attr('r', 9).attr('fill', 'none').attr('stroke', C.accent).attr('stroke-width', 2.5)
+  // overlay: ring on the selected game, and direct labels on the two story examples
+  const gm = e.game !== null && F.includes(byId.get(e.game)) ? byId.get(e.game) : null;
+  S.over.selectAll('circle').data(gm ? [gm] : []).join('circle').attr('r', 10).attr('fill', 'none').attr('stroke', C.accent).attr('stroke-width', 2.5)
     .attr('cx', d => S.pos.get(d.id).x).attr('cy', d => S.pos.get(d.id).y);
-  const pool = any ? F.filter(g => inFocus(g, e)) : F;
-  const top = pool.slice().sort((a, b) => b.c - a.c)[0];
-  S.over.selectAll('text').data(top ? [top] : [], d => d.id).join('text').attr('font-size', 11.5).attr('fill', C.ink)
-    .attr('x', d => S.pos.get(d.id).x + (S.pos.get(d.id).x > w - 110 ? -13 : 13)).attr('y', d => S.pos.get(d.id).y)
-    .attr('dy', '0.35em').attr('text-anchor', d => S.pos.get(d.id).x > w - 110 ? 'end' : 'start')
-    .attr('paint-order', 'stroke').attr('stroke', '#fff').attr('stroke-width', 3).text(d => `${d.n} (${int(d.c)})`);
+  const named = STORY.filter(g => F.includes(g) && lit(g));
+  // Each label tries six spots around its mark and keeps the one that covers the fewest other marks.
+  const labels = S.over.selectAll('text').data(named, d => d.id).join('text').attr('font-size', 11.5).style('fill', C.ink)
+    .attr('paint-order', 'stroke').attr('stroke', '#fff').attr('stroke-width', 3.5).attr('stroke-linejoin', 'round')
+    .each(function (d) {          // two short lines: the name, then price and rating
+      const t = d3.select(this); t.selectAll('tspan').remove();
+      t.append('tspan').attr('class', 'l1').attr('font-weight', 650).text(d.n);
+      t.append('tspan').attr('class', 'l2').attr('dy', '1.2em').text(w < 440 ? usd(d.p) : `${usd(d.p)} · ${tierBy.get(d.t).label}`);
+    });
+  const marks = F.filter(g => !named.includes(g)).map(g => S.pos.get(g.id)), taken = [];
+  labels.each(function (d) {
+    const p0 = S.pos.get(d.id), th = 28;
+    d3.select(this).attr('x', 0).attr('y', 0).attr('text-anchor', 'start').selectAll('tspan').attr('x', 0);
+    const tw = this.getBBox().width;
+    // dy = offset of the first line's centre from the mark; the label is two lines tall
+    const spots = [[10, -24, 'start'], [-10, -24, 'end'], [10, 12, 'start'], [-10, 12, 'end'], [12, -6, 'start'], [-12, -6, 'end']];
+    let best = null;
+    for (const [dx, dy, anchor] of spots) {
+      const x0 = anchor === 'start' ? p0.x + dx : p0.x + dx - tw, y0 = p0.y + dy - 7;
+      const box = { x0: x0 - 2, x1: x0 + tw + 2, y0: y0 - 2, y1: y0 + th + 2 };
+      let cost = marks.filter(q => q.x > box.x0 - 4 && q.x < box.x1 + 4 && q.y > box.y0 - 4 && q.y < box.y1 + 4).length;
+      if (box.x0 < 0 || box.x1 > w + 10 || box.y0 < -16) cost += 1000;     // never leave the plot
+      if (taken.some(t => !(box.x1 < t.x0 || box.x0 > t.x1 || box.y1 < t.y0 || box.y0 > t.y1))) cost += 300;
+      if (!best || cost < best.cost) best = { cost, dx, dy, anchor, box };
+    }
+    taken.push(best.box);
+    const t = d3.select(this).attr('text-anchor', best.anchor).attr('y', p0.y + best.dy);
+    t.selectAll('tspan').attr('x', p0.x + best.dx);
+  });
 
   const r = pearson(F);
   let title = 'No games match the current filter';
   if (r !== null) {
     const a = Math.abs(r), dir = r >= 0 ? 'more' : 'fewer';
-    title = a < 0.2 ? 'List price says little about peak players'
-      : a < 0.4 ? `Pricier games have slightly ${dir} peak players, but the link is weak`
-      : a < 0.6 ? `Pricier games tend to have ${dir} peak players`
-      : `Pricier games clearly have ${dir} peak players`;
+    title = a < 0.2 ? 'Price says almost nothing about how many people play'
+      : a < 0.4 ? `Pricier games draw only slightly ${dir} players; the link is weak`
+      : a < 0.6 ? `Pricier games tend to draw ${dir} players`
+      : `Pricier games clearly draw ${dir} players`;
     title += ` (r = ${r.toFixed(2)})`;
   }
   $('t2').textContent = title;
-  $('d2').textContent = `One dot per paid game (${F.length}). r is Pearson's correlation of price with log players. Same-price dots are nudged apart.`;
+  $('d2').textContent = `${F.length} paid games. Circle = indie, triangle = non-indie, colour = review tier. r = Pearson’s correlation of price and log players.`;
   const note = [];
   if (any) {
-    const rs = pearson(pool), what = [e.genre, e.year !== null ? 'released ' + e.year : null].filter(Boolean).join(', ');
-    note.push(`In colour: ${what} (${pool.length} game${pool.length === 1 ? '' : 's'}${rs !== null && pool.length >= 8 ? ', r = ' + rs.toFixed(2) : ''}).`);
+    const pool = F.filter(g => inFocus(g, e)), rs = pearson(pool);
+    const what = [bd ? `priced ${bd.label === '$50+' ? '$50 and up' : bd.label.replace('Under', 'under')}` : null, e.year !== null ? 'released ' + e.year : null].filter(Boolean).join(', ');
+    note.push(`In colour: games ${what} (${pool.length}${rs !== null && pool.length >= 8 && !bd ? ', r = ' + rs.toFixed(2) : ''}).`);
   }
   if (gm) note.push(`Orange ring: ${gm.n}.`);
   setNote('s2', note.join(' '));
 }
 
-/* ---------- Q3: genre rows shared by the bar chart and the waffle ---------- */
-const LABEL_W = 160, ROW_H = 22;
-function genreLabel(sel) {
-  sel.append('text').attr('class', 'glabel').attr('text-anchor', 'end').attr('x', -10).attr('dy', '0.35em').attr('font-size', 12);
-}
-function styleRow(row, e, yMid) {
-  const gm = e.game !== null ? byId.get(e.game) : null;
-  row.select('.glabel').attr('y', yMid)
-    .attr('font-weight', d => (state.genre === d.name || e.genre === d.name || (gm && gm.g.includes(d.name))) ? 700 : 400)
-    .attr('fill', d => e.genre && e.genre !== d.name ? C.muted : C.ink);
-}
-const genreCfg = (nodes, tipFn) => ({ hover: d => ({ genre: d.name }), pin: d => toggle('genre', d.name), nodes, tip: tipFn });
-
+/* ---------- Chart 3: review shares by price band (Q3) ---------- */
 const B = {};
-function initBars() {
-  const svg = d3.select('#c3').append('svg').attr('role', 'group').attr('aria-label', 'Bar chart of median list price for the 8 most-owned genres');
+const LABEL_W = 108;
+function initBands() {
+  const svg = d3.select('#c3').append('svg').attr('role', 'group')
+    .attr('aria-label', 'Stacked bar chart: share of games in each review tier, for four price bands from under $15 to $50 and up');
   B.g = svg.append('g');
   B.grid = B.g.append('g').attr('aria-hidden', 'true');
   B.xAxis = B.g.append('g').attr('aria-hidden', 'true');
   B.titles = B.g.append('g').attr('aria-hidden', 'true');
-  B.titles.append('text').attr('class', 'xtitle').attr('text-anchor', 'middle').text('Median list price (US$)');
-  const rows = B.g.append('g').selectAll('g').data(GENRES, d => d.name).join('g').attr('role', 'button').attr('tabindex', -1);
+  B.titles.append('text').attr('class', 'xtitle').attr('text-anchor', 'middle').text('Share of the band’s games');
+  const rows = B.g.append('g').selectAll('g').data(BANDS, d => d.k).join('g').attr('role', 'button').attr('tabindex', -1);
   rows.append('rect').attr('class', 'hitrect').attr('fill', 'transparent');
-  genreLabel(rows);
-  rows.append('rect').attr('class', 'bar').attr('rx', 2);
-  rows.append('text').attr('class', 'val').attr('dy', '0.35em').attr('font-size', 11.5).attr('text-anchor', 'end').style('font-variant-numeric', 'tabular-nums');
-  rows.append('circle').attr('class', 'gm').attr('r', 4.5).attr('fill', '#fff').attr('stroke', C.accent).attr('stroke-width', 2.5).style('pointer-events', 'none');
-  rows.append('rect').attr('class', 'fr').attr('rx', 3);
-  B.rows = rows;
-  wire(rows, genreCfg(() => rows.nodes(), d => {
-    const s = genreStats(visible()).find(x => x.name === d.name);
-    return {
-      title: d.name,
-      rows: s.n ? [{ k: 'Median list price', v: usd(s.median) }, { k: 'Mean list price', v: usd(s.mean) }, { k: 'Paid games', v: String(s.n) }] : [{ k: 'Paid games', v: '0' }],
-      note: (state.tiers.size < 4 ? 'Shown review tiers only. ' : '') + pinNote(state.genre === d.name)
-    };
-  }));
-  ensureTabStop(rows.nodes());
-}
-function renderBars(F, e, animate) {
-  const box = $('c3'), W = box.clientWidth;
-  const m = { t: 4, r: 56, b: 40, l: LABEL_W }, w = Math.max(80, W - m.l - m.r), h = GENRES.length * ROW_H;
-  B.g.attr('transform', `translate(${m.l},${m.t})`);
-  const x = d3.scaleLinear().domain([0, PRICE_MAX]).range([0, w]);
-  const stats = new Map(genreStats(F).map(s => [s.name, s]));
-  const ticks = w < 200 ? [0, 20, 40, 60] : x.ticks(7);
-  B.grid.selectAll('line').data(ticks).join('line').attr('x1', d => x(d)).attr('x2', d => x(d)).attr('y1', 0).attr('y2', h).attr('stroke', d => d === 0 ? C.axis : C.grid);
-  B.xAxis.attr('transform', `translate(0,${h})`).call(d3.axisBottom(x).tickValues(ticks).tickSize(0).tickPadding(6).tickFormat(usd0)).call(g => g.select('.domain').remove());
-  B.titles.select('.xtitle').attr('x', w / 2).attr('y', h + 34);
-  const gm = e.game !== null ? byId.get(e.game) : null;
-  B.rows.attr('transform', (d, i) => `translate(0,${i * ROW_H})`)
-    .attr('aria-pressed', d => state.genre === d.name ? 'true' : 'false')
-    .attr('aria-label', d => { const s = stats.get(d.name); return `${d.name}: ` + (s.n ? `median list price ${usd(s.median)}, ${s.n} paid games` : 'no games in the shown tiers') + '. Press Enter to select this genre.'; });
-  B.rows.select('.hitrect').attr('x', -m.l).attr('width', W).attr('y', 0).attr('height', ROW_H);
-  B.rows.select('.fr').attr('x', -m.l + 2).attr('width', W - 4).attr('y', 1).attr('height', ROW_H - 2);
-  B.rows.select('.glabel').text(d => `${d.name} (${stats.get(d.name).n})`);
-  styleRow(B.rows, e, ROW_H / 2);
-  const bar = B.rows.select('.bar').attr('x', 0).attr('y', 4).attr('height', ROW_H - 8)
-    .attr('fill', d => e.genre ? (e.genre === d.name ? C.accent : C.ctx) : C.ink2);
-  (animate && !reduceMotion ? bar.transition().duration(300) : bar).attr('width', d => { const s = stats.get(d.name); return s.n ? x(s.median) : 0; });
-  B.rows.select('.val').attr('x', w + m.r - 2).attr('y', ROW_H / 2).attr('fill', d => e.genre && e.genre !== d.name ? C.muted : C.ink)
-    .attr('font-weight', d => e.genre === d.name ? 700 : 400)
-    .text(d => { const s = stats.get(d.name); return s.n ? usd(s.median) : 'no games'; });
-  B.rows.select('.gm').attr('cy', ROW_H / 2).attr('cx', gm ? x(gm.p) : 0)
-    .style('display', d => gm && gm.g.includes(d.name) && state.tiers.has(gm.t) ? null : 'none');
-
-  const have = [...stats.values()].filter(s => s.n > 0);
-  let title = 'No games match the current filter';
-  if (have.length) {
-    const hi = have.slice().sort((a, b) => b.median - a.median)[0], lo = have.slice().sort((a, b) => a.median - b.median)[0];
-    title = hi.median === lo.median ? `Every genre has the same median list price (${usd(hi.median)})`
-      : `${hi.name} games have the highest median list price (${usd(hi.median)}); ${lo.name} the lowest (${usd(lo.median)})`;
-  }
-  $('t3').textContent = title;
-  $('d3').textContent = 'Median list price by genre, with the number of paid games in brackets. A game counts in every genre it carries.';
-  setNote('s3', gm && state.tiers.has(gm.t) ? `Orange ring: ${gm.n} (${usd(gm.p)}).` : e.genre ? `Selected: ${e.genre}.` : '');
-}
-
-const Wf = {};
-const waffleSeq = G => TIERS.flatMap(t => d3.range(G.squares[t.k]).map(() => t.k));   // 20 squares, darkest tier first
-function initWaffle() {
-  const svg = d3.select('#c4').append('svg').attr('role', 'group').attr('aria-label', 'Waffle chart of review-tier shares for the 8 most-owned genres; each square is 5 percent of a genre');
-  Wf.g = svg.append('g');
-  Wf.scale = Wf.g.append('g').attr('class', 'scale').attr('aria-hidden', 'true');
-  const rows = Wf.g.append('g').selectAll('g').data(GENRES, d => d.name).join('g').attr('role', 'button').attr('tabindex', -1);
-  rows.append('rect').attr('class', 'hitrect').attr('fill', 'transparent');
-  genreLabel(rows);
-  rows.selectAll('rect.sq').data(d => waffleSeq(d).map((k, i) => ({ k, i, genre: d.name }))).join('rect').attr('class', 'sq').attr('rx', 1.5);
+  rows.append('text').attr('class', 'glabel').attr('text-anchor', 'end').attr('x', -12);
+  rows.append('text').attr('class', 'gsub').attr('text-anchor', 'end').attr('x', -12).attr('font-size', 10.5).attr('fill', C.muted);
+  const segs = rows.selectAll('g.sg').data(b => TIERS.map(t => ({ band: b.k, k: t.k }))).join('g').attr('class', 'sg');
+  segs.append('rect').attr('class', 'seg-r').attr('rx', 2);
+  segs.append('text').attr('class', 'seg').attr('dy', '0.35em').attr('text-anchor', 'middle').style('pointer-events', 'none');
   rows.append('line').attr('class', 'gmu').attr('stroke', C.accent).attr('stroke-width', 3).attr('stroke-linecap', 'round').style('pointer-events', 'none');
-  rows.append('rect').attr('class', 'fr').attr('rx', 3);
-  Wf.rows = rows;
-  wire(rows, genreCfg(() => rows.nodes(), d => ({
-    title: `${d.name} (${d.n} paid games)`,
-    rows: TIERS.map(t => ({ k: t.label, sw: t.color, v: `${d.counts[t.k]} (${pct(d.counts[t.k] / d.n)}) · ${d.squares[t.k]} sq` })),
-    note: '1 square = 5% of the genre. ' + pinNote(state.genre === d.name)
-  })));
+  rows.append('rect').attr('class', 'fr').attr('rx', 4);
+  B.rows = rows;
+  wire(rows, {
+    hover: d => ({ band: d.k }),
+    pin: d => toggle('band', d.k),
+    nodes: () => rows.nodes(),
+    tip: d => {
+      const s = bandStats().find(x => x.k === d.k);
+      return {
+        title: `${d.label === '$50+' ? '$50 and up' : d.label} (${s.n} game${s.n === 1 ? '' : 's'})`,
+        sections: [
+          { rows: TIERS.map(t => ({ k: t.label, sw: t.color, v: `${pct(s.share(t.k))} (${s.counts[t.k]})` })) },
+          { rows: s.n ? [{ k: 'Median price', v: usd(s.median) }, { k: 'Median peak players', v: int(Math.round(s.players)) }, { k: 'Indie games', v: String(s.indie) }] : [] }
+        ],
+        note: pinNote(state.band === d.k)
+      };
+    }
+  });
   ensureTabStop(rows.nodes());
 }
-function renderWaffle(F, e) {
-  const box = $('c4'), W = box.clientWidth;
-  const m = { t: 20, r: 8, l: LABEL_W }, w = Math.max(80, W - m.l - m.r);
-  const gap = 2, groupGap = 5;
-  const s = Math.max(5, Math.min(ROW_H - 7, (w - 16 * gap - 3 * groupGap) / 20));
-  const sx = i => i * (s + gap) + Math.floor(i / 5) * (groupGap - gap);
-  Wf.g.attr('transform', `translate(${m.l},${m.t})`);
-  Wf.scale.selectAll('text').data([5, 10, 15, 20]).join('text').attr('text-anchor', 'end').attr('font-size', 10.5).attr('fill', C.muted)
-    .attr('x', d => sx(d - 1) + s).attr('y', -6).text(d => d * 5 + '%');
-  const gm = e.game !== null ? byId.get(e.game) : null;
-  Wf.rows.attr('transform', (d, i) => `translate(0,${i * ROW_H})`)
-    .attr('aria-pressed', d => state.genre === d.name ? 'true' : 'false')
-    .attr('aria-label', d => `${d.name}, ${d.n} paid games: ` + TIERS.map(t => `${pct(d.counts[t.k] / d.n)} ${t.label}`).join(', ') + '. Press Enter to select this genre.')
-    .attr('opacity', d => e.genre && e.genre !== d.name ? 0.3 : 1);
-  Wf.rows.select('.hitrect').attr('x', -m.l).attr('width', W).attr('y', 0).attr('height', ROW_H);
-  Wf.rows.select('.fr').attr('x', -m.l + 2).attr('width', W - 4).attr('y', 1).attr('height', ROW_H - 2);
-  Wf.rows.select('.glabel').text(d => `${d.name} (${d.n})`);
-  styleRow(Wf.rows, e, ROW_H / 2);
-  Wf.rows.selectAll('rect.sq').attr('x', d => sx(d.i)).attr('y', (ROW_H - s) / 2).attr('width', s).attr('height', s)
-    .attr('fill', d => state.tiers.has(d.k) ? tierBy.get(d.k).color : '#fff')
-    .attr('stroke', d => state.tiers.has(d.k) ? 'none' : C.axis).attr('stroke-width', 1);
-  const run = G => {            // first and last square of the selected game's tier in this row
-    let start = 0; for (const t of TIERS) { if (t.k === gm.t) break; start += G.squares[t.k]; }
-    return { start, len: G.squares[gm.t] };
-  };
-  const showRun = G => gm && state.tiers.has(gm.t) && gm.g.includes(G.name) && G.squares[gm.t] > 0;
-  Wf.rows.select('.gmu').style('display', d => showRun(d) ? null : 'none')
-    .attr('y1', (ROW_H + s) / 2 + 2).attr('y2', (ROW_H + s) / 2 + 2)
-    .attr('x1', d => showRun(d) ? sx(run(d).start) + 1 : 0).attr('x2', d => showRun(d) ? sx(run(d).start + run(d).len - 1) + s - 1 : 0);
+function renderBands(F, e, animate) {
+  const box = $('c3'), W = box.clientWidth, H = box.clientHeight;
+  const m = { t: 6, r: 10, b: 44, l: LABEL_W }, w = Math.max(80, W - m.l - m.r), h = Math.max(160, H - m.t - m.b);
+  B.g.attr('transform', `translate(${m.l},${m.t})`);
+  const x = d3.scaleLinear().domain([0, 1]).range([0, w]);
+  const rowH = h / BANDS.length, barH = Math.max(22, Math.min(54, rowH * 0.5)), gap = 2;
+  const ticks = [0, 0.25, 0.5, 0.75, 1];
+  B.grid.selectAll('line').data(ticks).join('line').attr('x1', d => x(d)).attr('x2', d => x(d)).attr('y1', 0).attr('y2', h).attr('stroke', d => d === 0 ? C.axis : C.grid);
+  B.xAxis.attr('transform', `translate(0,${h})`).call(d3.axisBottom(x).tickValues(ticks).tickSize(0).tickPadding(7).tickFormat(d3.format('.0%'))).call(g => g.select('.domain').remove());
+  B.titles.select('.xtitle').attr('x', w / 2).attr('y', h + 36);
 
-  const share = G => G.counts[4] / G.n;
-  const best = GENRES.slice().sort((a, b) => share(b) - share(a))[0];
-  const none = GENRES.filter(G => G.counts[4] === 0).map(G => G.name);
-  $('t4').textContent = `${best.name} has the largest share of Overwhelmingly Positive games (${pct(share(best))} of ${best.n})`
-    + (none.length ? `; ${none.join(' and ')} has none` : '');
-  $('d4').textContent = 'One row per genre. Each square is 5% of its paid games, best review tier first, so a longer dark run means better reviews.';
+  const stats = new Map(bandStats().map(s => [s.k, s]));
+  const gm = e.game !== null && F.includes(byId.get(e.game)) ? byId.get(e.game) : null;
+  B.rows.attr('transform', (d, i) => `translate(0,${i * rowH})`)
+    .attr('aria-pressed', d => state.band === d.k ? 'true' : 'false')
+    .attr('aria-label', d => { const s = stats.get(d.k); return `${d.label}, ${s.n} games: ` + (s.n ? TIERS.map(t => `${pct(s.share(t.k))} ${t.label}`).join(', ') : 'no games for the current filter') + '. Press Enter to highlight these games in charts 1 and 2.'; })
+    .attr('opacity', d => e.band !== null && e.band !== d.k ? 0.35 : 1);
+  B.rows.select('.hitrect').attr('x', -m.l).attr('width', W).attr('y', 0).attr('height', rowH);
+  B.rows.select('.fr').attr('x', -m.l + 2).attr('width', W - 4).attr('y', 2).attr('height', rowH - 4);
+  const yMid = rowH / 2;
+  B.rows.select('.glabel').attr('y', yMid - 3).attr('fill', C.ink)
+    .attr('font-weight', d => state.band === d.k || e.band === d.k || (gm && gm.b === d.k) ? 700 : 500)
+    .text(d => d.label === '$50+' ? '$50 and up' : d.label);
+  B.rows.select('.gsub').attr('y', yMid + 12).text(d => {
+    const s = stats.get(d.k);
+    let t = `${s.n} game${s.n === 1 ? '' : 's'}`;
+    if (e.year !== null) t += ` · ${F.filter(g => g.b === d.k && g.y === e.year).length} from ${e.year}`;
+    return t;
+  });
+  // segments, best tier first so its share starts at the common baseline
+  B.rows.each(function (bd) {
+    const s = stats.get(bd.k); let acc = 0;
+    const layout = TIERS.map(t => { const v = s.share(t.k), seg = { k: t.k, x0: acc, x1: acc + v, v }; acc += v; return seg; });
+    const row = d3.select(this);
+    const sg = row.selectAll('g.sg').data(layout, d => d.k);
+    const rects = sg.select('rect.seg-r').attr('y', yMid - barH / 2).attr('height', barH)
+      .attr('fill', d => state.tiers.has(d.k) ? tierBy.get(d.k).color : '#fff')
+      .attr('stroke', d => state.tiers.has(d.k) ? 'none' : C.axis).attr('stroke-width', 1);
+    (animate && !reduceMotion ? rects.transition().duration(300) : rects)
+      .attr('x', d => x(d.x0) + (d.x0 > 0 ? gap / 2 : 0))
+      .attr('width', d => Math.max(0, x(d.x1) - x(d.x0) - (d.x0 > 0 ? gap / 2 : 0) - (d.x1 < 0.9999 ? gap / 2 : 0)));
+    sg.select('text.seg').attr('x', d => x((d.x0 + d.x1) / 2)).attr('y', yMid)
+      .style('fill', d => !state.tiers.has(d.k) ? C.muted : d.k === 1 ? '#061b4d' : '#fff')
+      .attr('font-size', d => d.k === 4 && x(d.x1) - x(d.x0) >= 36 ? 13 : 11)
+      .text(d => x(d.x1) - x(d.x0) >= (d.k === 4 ? 25 : 30) ? pct(d.v) : '');   // the headline share keeps its label on narrow screens
+    const mine = gm && gm.b === bd.k ? layout.find(l => l.k === gm.t) : null;
+    row.select('.gmu').style('display', mine && mine.v > 0 ? null : 'none')
+      .attr('y1', yMid + barH / 2 + 4).attr('y2', yMid + barH / 2 + 4)
+      .attr('x1', mine ? x(mine.x0) + 2 : 0).attr('x2', mine ? x(mine.x1) - 2 : 0);
+  });
+
+  const have = BANDS.map(b => stats.get(b.k)).filter(s => s.n > 0);
+  let title = 'No games match the current filter';
+  if (have.length >= 2) {
+    const a = have[0], z = have[have.length - 1], pa = a.share(4), pz = z.share(4);
+    title = pz < pa ? `${pct(pa)} of games ${BAND_PHRASE[a.k]} are Overwhelmingly Positive, but only ${pct(pz)} ${BAND_PHRASE[z.k]}`
+      : pz > pa ? `${pct(pz)} of games ${BAND_PHRASE[z.k]} are Overwhelmingly Positive, against ${pct(pa)} ${BAND_PHRASE[a.k]}`
+      : `${pct(pa)} of games are Overwhelmingly Positive both ${BAND_PHRASE[a.k]} and ${BAND_PHRASE[z.k]}`;
+  } else if (have.length === 1) title = `${pct(have[0].share(4))} of games ${BAND_PHRASE[have[0].k]} are Overwhelmingly Positive`;
+  $('t3').textContent = title;
+  $('d3').textContent = 'Review tiers of each price band’s games. The darkest part starts at 0, so its length is the share rated Overwhelmingly Positive.';
   const note = [];
+  if (state.studios.size < STUDIOS.length) note.push(`${STUDIOS.filter(s => state.studios.has(s.k)).map(s => s.label).join(', ')} games only.`);
   if (state.tiers.size < 4) note.push('Hollow: hidden tiers.');
-  if (gm && state.tiers.has(gm.t)) note.push(`Underlined: the tier of ${gm.n}.`); else if (e.genre) note.push(`Selected: ${e.genre}.`);
-  setNote('s4', note.join(' '));
+  if (gm) note.push(`Underlined: ${gm.n} (${tierBy.get(gm.t).label}).`);
+  else if (e.year !== null) note.push(`Counts from ${e.year} under each band.`);
+  setNote('s3', note.join(' '));
 }
 
-/* ---------- status line and data tables ---------- */
+/* ---------- status line, announcements and data tables ---------- */
 // The visible status line is rebuilt only when its content changes. Screen readers get the same content
-// through a separate, hidden live region that is written once per real change, shortly after the key press,
-// so the announcement is not swallowed by the button's own "pressed" announcement.
+// through a separate, hidden live region that is written once per real change, shortly after the key press.
 let statusKey = null, announceTimer = 0;
-function renderStatus(F, e) {
+function renderStatus(F) {
   const parts = [];
-  if (state.tiers.size < 4) parts.push(['Review tiers shown', TIERS.filter(t => state.tiers.has(t.k)).map(t => t.label).join(', ') + ` (${F.length} of ${games.length} games)`]);
-  if (state.genre) parts.push(['Genre', `${state.genre} (${F.filter(g => g.g.includes(state.genre)).length} games)`]);
+  if (state.tiers.size < 4) parts.push(['Review tiers shown', TIERS.filter(t => state.tiers.has(t.k)).map(t => t.label).join(', ')]);
+  if (state.studios.size < STUDIOS.length) parts.push(['Developer', STUDIOS.filter(s => state.studios.has(s.k)).map(s => s.label).join(', ')]);
+  if (parts.length) parts.push(['Games shown', `${F.length} of ${games.length}`]);
+  if (state.band !== null) { const b = bandBy.get(state.band); parts.push(['Price band', `${b.label === '$50+' ? '$50 and up' : b.label} (${F.filter(g => g.b === b.k).length} games)`]); }
   if (state.year !== null) parts.push(['Year', `${state.year} (${F.filter(g => g.y === state.year).length} games)`]);
-  if (state.game !== null) { const g = byId.get(state.game); parts.push(['Game', `${g.n}, ${usd(g.p)}, ${int(g.c)} peak players`]); }
+  if (state.game !== null) { const g = byId.get(state.game); parts.push(['Game', `${g.n}, ${usd(g.p)}, ${int(g.c)} peak players, ${tierBy.get(g.t).label}`]); }
   const key = JSON.stringify(parts);
-  if (key === statusKey) return;                       // pointing at marks does not touch the status
+  if (key === statusKey) return;
   const first = statusKey === null; statusKey = key;
-
   const st = $('status'); st.replaceChildren(); st.classList.toggle('on', parts.length > 0);
-  if (!parts.length) st.textContent = `Showing all ${games.length} paid games. Point at or click a genre, a year or a game to link the four views. Click a review tier to filter.`;
+  if (!parts.length) st.textContent = `Showing all ${games.length} paid games. Point at or click a price band, a year or a game to link the three charts. Use the buttons above to filter.`;
   else {
     parts.forEach(([label, value]) => { const sp = el('span'); sp.appendChild(el('b', '', label + ': ')); sp.appendChild(document.createTextNode(value)); st.appendChild(sp); st.appendChild(document.createTextNode(' · ')); });
     st.appendChild(document.createTextNode('Press Esc or Reset to clear.'));
   }
-  if (first) return;                                   // nothing to announce on page load
+  if (first) return;
   const msg = parts.length ? parts.map(([label, value]) => `${label}: ${value}`).join('. ') + '.' : `Selection cleared. Showing all ${games.length} paid games.`;
   clearTimeout(announceTimer);
   announceTimer = setTimeout(() => { $('announce').textContent = msg; }, 150);
@@ -864,12 +917,10 @@ function table(target, head, rows) {
 function renderTables(F) {
   table('tb1', [{ label: 'Release year' }, { label: 'Median', num: 1 }, { label: 'Mean', num: 1 }, { label: 'Games', num: 1 }],
     yearStats(F).map(s => [String(s.year), s.n ? usd(s.median) : '–', s.n ? usd(s.mean) : '–', String(s.n)]));
-  table('tb2', [{ label: 'Game' }, { label: 'List price', num: 1 }, { label: 'Peak players', num: 1 }, { label: 'Year', num: 1 }, { label: 'Review tier' }],
-    F.slice().sort((a, b) => b.c - a.c).map(g => [g.n, usd(g.p), int(g.c), g.y === null ? '–' : String(g.y), tierBy.get(g.t).label]));
-  table('tb3', [{ label: 'Genre' }, { label: 'Median', num: 1 }, { label: 'Mean', num: 1 }, { label: 'Games', num: 1 }],
-    genreStats(F).map(s => [s.name, s.n ? usd(s.median) : '–', s.n ? usd(s.mean) : '–', String(s.n)]));
-  table('tb4', [{ label: 'Genre' }].concat(TIERS.map(t => ({ label: t.label, num: 1 }))).concat([{ label: 'Games', num: 1 }]),
-    GENRES.map(G => [G.name].concat(TIERS.map(t => `${G.counts[t.k]} (${pct(G.counts[t.k] / G.n)})`)).concat([String(G.n)])));
+  table('tb2', [{ label: 'Game' }, { label: 'List price', num: 1 }, { label: 'Peak players', num: 1 }, { label: 'Review tier' }, { label: 'Developer' }, { label: 'Year', num: 1 }],
+    F.slice().sort((a, b) => b.c - a.c).map(g => [g.n, usd(g.p), int(g.c), tierBy.get(g.t).label, studioBy.get(g.s).label, g.y === null ? '–' : String(g.y)]));
+  table('tb3', [{ label: 'Price band' }].concat(TIERS.map(t => ({ label: t.label, num: 1 }))).concat([{ label: 'Games', num: 1 }]),
+    bandStats().map(s => [s.label].concat(TIERS.map(t => s.n ? `${pct(s.share(t.k))} (${s.counts[t.k]})` : '–')).concat([String(s.n)])));
 }
 
 /* ---------- render loop ---------- */
@@ -878,13 +929,12 @@ function render(dataChanged) {
   renderLegend();
   renderLine(F, e);
   renderScatter(F, e);
-  renderBars(F, e, dataChanged === true);
-  renderWaffle(F, e);
-  renderStatus(F, e);
+  renderBands(F, e, dataChanged === true);
+  renderStatus(F);
   if (dataChanged === true) renderTables(F);
 }
 
-initLegend(); initLine(); initScatter(); initBars(); initWaffle();
+initLegend(); initLine(); initScatter(); initBands();
 render(true);
 let raf = 0;
 new ResizeObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => render()); }).observe(document.querySelector('.grid'));
@@ -892,7 +942,7 @@ new ResizeObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFram
 // read-only hook used for checking the numbers on the page against the cleaned tables
 window.steamDash = {
   state,
-  stats: () => ({ years: yearStats(visible()), genres: genreStats(visible()), r: pearson(visible()), n: visible().length })
+  stats: () => ({ years: yearStats(visible()), bands: bandStats().map(s => ({ k: s.k, n: s.n, counts: s.counts })), r: pearson(visible()), n: visible().length })
 };
 })();
 
