@@ -26,12 +26,15 @@ h1.title{margin:0 0 6px;font-size:clamp(30px,2.6vw,40px);line-height:1;display:f
 h1.title .tg{display:flex;flex-wrap:wrap;gap:.08em .25em}
 h1.title svg{height:1em;flex:none;display:block;fill:currentColor}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-.hook{margin:0;font-size:15px;line-height:1.35;color:var(--ink);font-weight:600;max-width:62ch;text-wrap:balance}
+.hook{margin:0;font-size:15px;line-height:1.35;color:var(--ink);font-weight:600;max-width:70ch;text-wrap:balance}
 .sub{margin:3px 0 0;color:var(--ink2);font-size:12.5px}
-.top{display:flex;flex-wrap:wrap;gap:10px 28px;align-items:flex-end;justify-content:space-between}
-.titles{flex:1 1 420px;min-width:0}
-.features{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end}
-.legend-title{margin:0 0 5px;font-size:12px;font-weight:600;color:var(--ink)}
+.top{display:flex;flex-wrap:wrap;gap:10px 28px;align-items:flex-start;justify-content:space-between}
+.titles{flex:1 1 380px;min-width:0}
+.features{display:flex;flex-direction:column;gap:8px;align-items:stretch;padding-top:4px}
+.legend{display:flex;align-items:center;gap:10px}
+.frow{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px}
+.fbtns{display:flex;gap:8px;align-items:center}
+.legend-title{margin:0;font-size:12px;font-weight:600;color:var(--ink);min-width:72px}
 .hint{font-weight:400;color:var(--muted);margin-left:6px}
 .tiers{display:flex;flex-wrap:wrap;gap:6px}
 .tier{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:12.5px;color:var(--ink);background:var(--surface);
@@ -46,16 +49,42 @@ h1.title svg{height:1em;flex:none;display:block;fill:currentColor}
 .tier:hover{border-color:var(--ink2)}
 .reset{font:inherit;font-size:12.5px;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid #9aa1ad;border-radius:6px;padding:5px 12px;cursor:pointer}
 .reset:hover{background:#eceef1}
+/* "How to use" dropdown: instructions stay one click away instead of on screen. */
+.howto{position:relative}
+.howto summary{list-style:none;font-size:12.5px;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid #9aa1ad;border-radius:6px;padding:5px 12px;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.howto summary::-webkit-details-marker{display:none}
+.howto summary::after{content:"";width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg) translate(-1px,-1px)}
+.howto[open] summary::after{transform:rotate(-135deg) translate(-1px,-1px)}
+.howto summary:hover{background:#eceef1}
+.howto-panel{position:absolute;right:0;top:calc(100% + 6px);z-index:20;width:min(360px,calc(100vw - 32px));background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(17,24,39,.14);padding:12px 14px;font-size:12.5px;color:var(--ink2)}
+.howto-panel ul{margin:0;padding-left:17px}
+.howto-panel li{margin:0 0 5px}
+.howto-panel b{color:var(--ink)}
 button:focus-visible,summary:focus-visible,a:focus-visible{outline:2.5px solid var(--accent);outline-offset:2px}
-.status{margin:10px 0 10px;padding:6px 10px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--ctx);border-radius:6px;font-size:12.5px;color:var(--ink2);min-height:32px}
+.status{margin:8px 0 10px;padding:6px 10px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--ctx);border-radius:6px;font-size:12.5px;color:var(--ink2);min-height:32px}
 .status.on{border-left-color:var(--accent);color:var(--ink)}
 .status b{color:var(--ink)}
 
-.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:11px 13px 8px;display:flex;flex-direction:column;min-width:0}
+/* Chart 1, the scatterplot, fills the left column at full height: 142 marks over six orders of magnitude need
+   the most room. Charts 2 (price trend) and 3 (reviews) share the right column, stacked, at the same size. */
+.grid{display:grid;grid-template-columns:1.12fr 1fr;grid-template-rows:auto auto;gap:12px}
+#p1{grid-column:1;grid-row:1 / span 2}
+#p2{grid-column:2;grid-row:1}
+#p3{grid-column:2;grid-row:2}
+#p2 .chart,#p3 .chart{min-height:330px}
+/* On laptop and desktop screens the grid is sized to the window (see fitGrid in the script), so the charts
+   shrink or grow to fit the screen instead of forcing a scroll. */
+@media (min-width:1181px){
+  .grid.fit{grid-template-rows:1fr 1fr}
+  .grid.fit .panel{min-height:0}
+  .grid.fit .chart{min-height:200px}
+  .grid.fit #p2 .chart,.grid.fit #p3 .chart{min-height:170px}
+}
+@media (min-width:1181px){ .selnote{height:1.45em;white-space:nowrap;text-overflow:ellipsis} }   /* one line on wide screens; the full note shows on hover */
+.panel{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:11px 13px 8px;display:flex;flex-direction:column;min-width:0;overflow:hidden}   /* nothing drawn inside a panel can spill into its neighbour */
 .q{margin:0;font-size:11.5px;color:var(--muted);display:flex;gap:7px;align-items:baseline}
 .qn{font-weight:700;color:var(--ink);font-size:11px;border:1px solid #9aa1ad;border-radius:4px;padding:0 5px;flex:none}
-h2{font-size:15px;line-height:1.3;margin:4px 0 2px;font-weight:650;text-wrap:balance;min-height:2.6em}
+h2{font-size:15px;line-height:1.3;margin:4px 0 2px;font-weight:650;text-wrap:balance}
 .desc{margin:0;font-size:12px;color:var(--ink2)}
 .selnote{margin:1px 0 4px;font-size:12px;font-weight:600;color:var(--ink);height:2.8em;overflow:hidden}
 .chart{position:relative;flex:1 1 auto;min-height:440px}
@@ -71,9 +100,10 @@ svg [tabindex]:focus-visible > .fr{opacity:1}
 svg .dot,svg .seg-r{transition:fill .15s,opacity .15s}
 @media (prefers-reduced-motion:reduce){svg .dot,svg .seg-r{transition:none}}
 
-details.tbl{margin-top:4px;font-size:12px}
-details.tbl summary{cursor:pointer;color:var(--ink2);width:max-content;padding:2px 2px}
-.tblwrap{max-height:230px;overflow:auto;margin-top:4px;border:1px solid var(--line);border-radius:6px}
+/* "Data table" sits in the panel's top-right corner and opens over the chart, so it costs no height. */
+details.tbl{font-size:12px}
+details.tbl summary{position:absolute;top:10px;right:12px;cursor:pointer;color:var(--ink2);padding:1px 2px;font-size:11px;background:var(--surface)}
+.tblwrap{position:absolute;left:10px;right:10px;top:32px;bottom:10px;z-index:5;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:6px;box-shadow:0 6px 18px rgba(17,24,39,.12)}
 table{border-collapse:collapse;width:100%;font-size:12px}
 th,td{text-align:left;padding:3px 8px;border-bottom:1px solid var(--line);vertical-align:top}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
@@ -83,8 +113,12 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .verdict h2{margin:0;min-height:0;font-size:16px;white-space:nowrap}
 .verdict p{margin:0;font-size:13.5px;line-height:1.45;color:var(--ink)}
 .verdict p.why{color:var(--ink2)}
+.about > summary{cursor:pointer;font-size:12.5px;width:max-content}
+.about{margin-top:12px}
+.about > summary{padding:8px 2px;font-weight:600;color:var(--ink)}
+.about .notes{margin-top:4px}
 .verdict b{color:var(--ink)}
-.notes{display:grid;grid-template-columns:1fr 1.1fr 1.3fr;gap:12px 28px;margin-top:16px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:8px;font-size:12.5px;color:var(--ink2)}
+.notes{display:grid;grid-template-columns:1fr 1.25fr;gap:12px 28px;margin-top:16px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:8px;font-size:12.5px;color:var(--ink2)}
 .notes h3{font-size:13px;margin:0 0 6px;color:var(--ink)}
 .notes ul{margin:0;padding-left:17px}
 .notes li{margin:0 0 4px}
@@ -107,16 +141,20 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 
 @media (max-width:1180px){
   .grid{grid-template-columns:1fr 1fr}
-  #p3{grid-column:1 / span 2}
-  #p3 .chart{min-height:300px}
+  #p1{grid-column:1 / span 2;grid-row:1}          /* the primary chart keeps the full width */
+  #p2{grid-column:1;grid-row:2}
+  #p3{grid-column:2;grid-row:2}
+  #p1 .chart{min-height:360px}
   .chart{min-height:400px}
   .verdict{grid-template-columns:1fr}
-  .notes{grid-template-columns:1fr 1fr}
 }
 @media (max-width:760px){
   .page{padding:12px 16px 24px}
   .grid{grid-template-columns:1fr}
   #p1,#p2,#p3{grid-column:1;grid-row:auto}
+  .howto-panel{right:auto;left:0}
+  details.tbl summary{position:static;margin-top:4px}
+  .tblwrap{position:static;max-height:260px;margin-top:4px;box-shadow:none}
   .chart{min-height:340px}
   .notes{grid-template-columns:1fr}
   .hint{display:block;margin-left:0}
@@ -127,7 +165,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .hint{font-size:11px}
 .q,.desc{font-size:11px}
 /* Each chart's "how to read" line is a visual key, not a sentence. */
-.desc.key{display:flex;flex-wrap:wrap;align-items:center;gap:3px 16px;min-height:1.7em;margin:2px 0 0}
+.desc.key{display:flex;flex-wrap:wrap;align-items:flex-start;align-content:flex-start;gap:4px 16px;min-height:1.7em;margin:2px 0 0}
 .key > span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .key svg{display:block;flex:none}
 .key .kln{width:30px;height:12px}
@@ -148,14 +186,30 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
     </div>
     <div class="features" role="group" aria-label="Filters">
       <div class="legend">
-        <p class="legend-title" id="tierTitle">Review tier <span class="hint">darker = better reviewed · click to hide or show</span></p>
+        <p class="legend-title" id="tierTitle">Review tier</p>
         <div class="tiers" id="tierButtons" role="group" aria-labelledby="tierTitle"></div>
       </div>
-      <div class="legend">
-        <p class="legend-title" id="studioTitle">Developer <span class="hint">shape in chart 2</span></p>
-        <div class="tiers" id="studioButtons" role="group" aria-labelledby="studioTitle"></div>
+      <div class="frow">
+        <div class="legend">
+          <p class="legend-title" id="studioTitle">Developer</p>
+          <div class="tiers" id="studioButtons" role="group" aria-labelledby="studioTitle"></div>
+        </div>
+        <div class="fbtns">
+          <details class="howto" id="howto">
+            <summary>How to use</summary>
+            <div class="howto-panel">
+              <ul>
+                <li><b>Point at</b> a year, a game or a price band to highlight the matching games in the other charts.</li>
+                <li><b>Click</b> it (or press Enter or Space) to keep the selection. Click again or press Esc to clear.</li>
+                <li><b>Keyboard:</b> Tab moves between charts, arrow keys move between marks inside a chart.</li>
+                <li><b>r</b> in chart 1 is Pearson’s correlation between price and (log) peak players: 0 means no link, 1 a perfect one.</li>
+                <li><b>Review tier and Developer buttons</b> (click to hide or show) filter every chart: the lines, dots, correlation and review shares are recalculated. A hidden review tier turns hollow in chart 3. Axes stay fixed so the charts can be compared before and after.</li>
+              </ul>
+            </div>
+          </details>
+          <button type="button" id="reset" class="reset">Reset</button>
+        </div>
       </div>
-      <button type="button" id="reset" class="reset">Reset</button>
     </div>
   </header>
 
@@ -163,26 +217,25 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
   <div id="announce" class="vh" role="status" aria-live="polite" aria-atomic="true"></div>
 
   <main class="grid">
-    <section class="panel" id="p1" aria-labelledby="t1">
+    <section class="panel" id="p1" aria-labelledby="t2">
       <header>
-        <p class="q"><span class="qn">Q1</span>Are paid games getting pricier?</p>
-        <h2 id="t1"></h2>
-        <p class="desc key" id="d1" aria-label="Key: median, solid line with circles; mean, dashed line with squares."><span><svg class="kln" viewBox="0 0 30 12" aria-hidden="true"><line x1="1" y1="6" x2="29" y2="6" stroke="#111827" stroke-width="2.5" stroke-linecap="round"/><circle cx="15" cy="6" r="3.8" fill="#111827" stroke="#fff" stroke-width="1.2"/></svg>Median</span><span><svg class="kln" viewBox="0 0 30 12" aria-hidden="true"><line x1="1" y1="6" x2="29" y2="6" stroke="#111827" stroke-width="2" stroke-dasharray="5 3.5"/><rect x="11.5" y="2.5" width="7" height="7" fill="#fff" stroke="#111827" stroke-width="1.75"/></svg>Mean</span></p>
-        <p class="selnote" id="s1"></p>
-      </header>
-      <div class="chart" id="c1"></div>
-      <details class="tbl"><summary>Data table</summary><div class="tblwrap" id="tb1"></div></details>
-    </section>
-
-    <section class="panel" id="p2" aria-labelledby="t2">
-      <header>
-        <p class="q"><span class="qn">Q2</span>Do pricier games have more players?</p>
+        <p class="q"><span class="qn">Q1</span>Do pricier games have more players?</p>
         <h2 id="t2"></h2>
         <p class="desc key" id="d2" aria-label="Key: circle, indie; triangle, non-indie; darker colour, better reviewed."><span><svg class="ksh" viewBox="-7 -7 14 14" aria-hidden="true"><circle r="4.6" fill="#4b5563"/></svg>Indie</span><span><svg class="ksh" viewBox="-7 -7 14 14" aria-hidden="true"><path d="M0,-6.1L5.3,3.05L-5.3,3.05Z" fill="#4b5563"/></svg>Non-indie</span><span><span class="ramp"><svg class="ksw" viewBox="0 0 12 12" aria-hidden="true"><rect x="0.5" y="0.5" width="11" height="11" rx="2" fill="#061b4d"/></svg><svg class="ksw" viewBox="0 0 12 12" aria-hidden="true"><rect x="0.5" y="0.5" width="11" height="11" rx="2" fill="#1c407a"/></svg><svg class="ksw" viewBox="0 0 12 12" aria-hidden="true"><rect x="0.5" y="0.5" width="11" height="11" rx="2" fill="#2f6aab"/></svg><svg class="ksw" viewBox="0 0 12 12" aria-hidden="true"><rect x="0.5" y="0.5" width="11" height="11" rx="2" fill="#4396de"/></svg></span>Darker = better reviewed</span></p>
         <p class="selnote" id="s2"></p>
       </header>
       <div class="chart" id="c2"></div>
       <details class="tbl"><summary>Data table</summary><div class="tblwrap" id="tb2"></div></details>
+    </section>
+    <section class="panel" id="p2" aria-labelledby="t1">
+      <header>
+        <p class="q"><span class="qn">Q2</span>Are paid games getting pricier?</p>
+        <h2 id="t1"></h2>
+        <p class="desc key" id="d1" aria-label="Key: median, solid line with circles; mean, dashed line with squares."><span><svg class="kln" viewBox="0 0 30 12" aria-hidden="true"><line x1="1" y1="6" x2="29" y2="6" stroke="#111827" stroke-width="2.5" stroke-linecap="round"/><circle cx="15" cy="6" r="3.8" fill="#111827" stroke="#fff" stroke-width="1.2"/></svg>Median</span><span><svg class="kln" viewBox="0 0 30 12" aria-hidden="true"><line x1="1" y1="6" x2="29" y2="6" stroke="#111827" stroke-width="2" stroke-dasharray="5 3.5"/><rect x="11.5" y="2.5" width="7" height="7" fill="#fff" stroke="#111827" stroke-width="1.75"/></svg>Mean</span></p>
+        <p class="selnote" id="s1"></p>
+      </header>
+      <div class="chart" id="c1"></div>
+      <details class="tbl"><summary>Data table</summary><div class="tblwrap" id="tb1"></div></details>
     </section>
 
     <section class="panel" id="p3" aria-labelledby="t3">
@@ -203,23 +256,15 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
     <p class="why"><b>Why might that be?</b> A cheap game only reaches Steam's top 200 if people love it, while a $70 blockbuster can get there on brand and marketing. So this is a pattern among popular games, not proof that a higher price causes worse reviews.</p>
   </section>
 
+  <details class="about">
+  <summary>About this dashboard: data, limits and encodings</summary>
   <section class="notes" aria-label="Notes">
-    <div>
-      <h3>How to use</h3>
-      <ul>
-        <li><b>Point at</b> a year, a game or a price band to highlight the matching games in the other charts.</li>
-        <li><b>Click</b> it (or press Enter or Space) to keep the selection. Click again or press Esc to clear.</li>
-        <li><b>Keyboard:</b> Tab moves between charts, arrow keys move between marks inside a chart.</li>
-        <li><b>r</b> in chart 2 is Pearson’s correlation between price and (log) peak players: 0 means no link, 1 a perfect one.</li>
-        <li><b>Review tier and Developer buttons</b> filter every chart: the lines, dots, correlation and review shares are recalculated. A hidden review tier turns hollow in chart 3. Axes stay fixed so the charts can be compared before and after.</li>
-      </ul>
-    </div>
     <div>
       <h3>Data and limits</h3>
       <ul>
         <li>Top 200 Steam games by owner estimate; 58 free games removed, leaving 142 paid games.</li>
         <li>Price is the list price, not the sale price on the day of the crawl (41 games were discounted).</li>
-        <li>Chart 1 covers 2012 to 2024, where every year has at least 5 games. 23 games from other years and 1 with no recorded year appear only in charts 2 and 3.</li>
+        <li>Chart 2 covers 2012 to 2024, where every year has at least 5 games. 23 games from other years and 1 with no recorded year appear only in charts 1 and 3.</li>
         <li>Indie means the game carries Steam's Indie tag. One game has no genres recorded and is drawn as a square.</li>
         <li>This is a sample of popular games, so prices run higher than Steam as a whole. All 22 games at $50 and up are non-indie.</li>
       </ul>
@@ -230,24 +275,26 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       <table class="enc">
         <thead><tr><th scope="col">Variable</th><th scope="col">Type</th><th scope="col">Channel</th></tr></thead>
         <tbody>
-          <tr><th scope="row">List price</th><td>Quantitative</td><td>Position on a common $0–$70 scale (y in chart 1, x in chart 2)</td></tr>
-          <tr><th scope="row">Release year</th><td>Ordinal</td><td>Position, left to right (x in chart 1)</td></tr>
-          <tr><th scope="row">Peak players</th><td>Quantitative</td><td>Position on a log scale (y in chart 2)</td></tr>
-          <tr><th scope="row">Review tier</th><td>Ordinal</td><td>Colour luminance, one hue, light to dark (chart 2 dots); share as length (chart 3)</td></tr>
+          <tr><th scope="row">List price</th><td>Quantitative</td><td>Position on a common $0–$70 scale (x in chart 1, y in chart 2)</td></tr>
+          <tr><th scope="row">Release year</th><td>Ordinal</td><td>Position, left to right (x in chart 2)</td></tr>
+          <tr><th scope="row">Peak players</th><td>Quantitative</td><td>Position on a log scale (y in chart 1)</td></tr>
+          <tr><th scope="row">Review tier</th><td>Ordinal</td><td>Colour luminance, one hue, light to dark (chart 1 marks); share as length (chart 3)</td></tr>
           <tr><th scope="row">Price band</th><td>Ordinal</td><td>Spatial region: one labelled row per band, cheapest at the top (chart 3)</td></tr>
-          <tr><th scope="row">Indie flag</th><td>Nominal</td><td>Shape: circle for indie, triangle for non-indie (chart 2)</td></tr>
+          <tr><th scope="row">Indie flag</th><td>Nominal</td><td>Shape: circle for indie, triangle for non-indie (chart 1)</td></tr>
           <tr><th scope="row">Game name</th><td>Nominal</td><td>Tooltip (details on demand)</td></tr>
         </tbody>
       </table>
       <ul>
         <li>After the prototype demo, Q3 changed from comparing 8 genres in two charts to one question, “Do pricier games get better reviews?”, in one chart of 4 price bands.</li>
+        <li>After peer testing, the scatterplot became Q1 and the largest chart, because 142 marks across six orders of magnitude need the most room; the price trend became Q2.</li>
         <li>Genre is replaced by the Indie flag, so the data keeps one simple nominal variable.</li>
-        <li>Review-tier colour is not used on the chart 1 lines, because each point there averages games of every tier.</li>
+        <li>Review-tier colour is not used on the chart 2 lines, because each point there averages games of every tier.</li>
         <li>Dots with the same price are nudged sideways (jitter) instead of made transparent, because transparency would change the luminance that encodes review tier.</li>
         <li>Orange marks your selection; grey marks context.</li>
       </ul>
     </div>
   </section>
+  </details>
 </div>
 <div id="tip" class="tip" role="tooltip" hidden></div>
 <script>
@@ -267,7 +314,7 @@ const D = window.STEAM_DATA;
 const games = D.games;                         // {id, n, p, c, y, t, s, b, g[]}
 const YEARS = d3.range(D.window[0], D.window[1] + 1);
 const BANDS = D.bands;                         // cheapest first: {k, label, lo, hi}
-const PRICE_MAX = 70;                          // one price scale for charts 1 and 2
+const PRICE_MAX = 70;                          // one price scale for the scatterplot and the price line
 const TIERS = [                                // dark to light, best tier first
   { k: 4, label: 'Overwhelmingly Positive', color: '#061b4d' },
   { k: 3, label: 'Very Positive', color: '#1c407a' },
@@ -326,7 +373,7 @@ function bandStats() {
       median: n ? d3.median(v, d => d.p) : null, players: n ? d3.median(v, d => d.c) : null, indie: v.filter(g => g.s === 'i').length };
   });
 }
-// Pearson r between list price and log10(peak players), the two plotted positions in chart 2.
+// Pearson r between list price and log10(peak players), the two plotted positions in the scatterplot.
 function pearson(list) {
   if (list.length < 3) return null;
   const x = list.map(d => d.p), y = list.map(d => Math.log10(d.c));
@@ -450,7 +497,10 @@ function initLegend() {
     TIERS.forEach(x => state.tiers.add(x.k)); STUDIOS.forEach(x => state.studios.add(x.k));
     state.band = state.year = state.game = null; state.hover = null; hideTip(); render(true);
   });
+  const howto = $('howto');
+  document.addEventListener('click', ev => { if (howto.open && !howto.contains(ev.target)) howto.open = false; });
   window.addEventListener('keydown', ev => {
+    if (ev.key === 'Escape' && howto.open) { howto.open = false; howto.querySelector('summary').focus(); return; }
     if (ev.key === 'Escape' && (state.band !== null || state.year !== null || state.game !== null)) {
       state.band = state.year = state.game = null; hideTip(); render();
     }
@@ -469,7 +519,7 @@ function renderLegend() {
   });
 }
 
-/* ---------- Chart 1: line chart (Q1) ---------- */
+/* ---------- Chart 2: price by release year, line chart (Q2) ---------- */
 const L = {};
 function initLine() {
   const svg = d3.select('#c1').append('svg').attr('role', 'group')
@@ -583,7 +633,7 @@ function renderLine(F, e) {
   L.hit.selectAll('g').each(function (yr) {
     const s = stats.find(d => d.year === yr), g = d3.select(this);
     g.attr('aria-pressed', state.year === yr ? 'true' : 'false')
-      .attr('aria-label', `${yr}: ` + (s.n ? `median ${usd(s.median)}, mean ${usd(s.mean)}, ${s.n} games` : 'no games') + '. Press Enter to highlight these games in chart 2.');
+      .attr('aria-label', `${yr}: ` + (s.n ? `median ${usd(s.median)}, mean ${usd(s.mean)}, ${s.n} games` : 'no games') + '. Press Enter to highlight these games in chart 1.');
     g.select('.hitrect').attr('x', x(yr) - step / 2).attr('width', step).attr('y', -6).attr('height', h + 46);
     g.select('.fr').attr('x', x(yr) - step / 2 + 1).attr('width', step - 2).attr('y', -6).attr('height', h + 46);
   });
@@ -604,7 +654,7 @@ function renderLine(F, e) {
   setNote('s1', note.join(' '));
 }
 
-/* ---------- Chart 2: scatterplot (Q2) ---------- */
+/* ---------- Chart 1: price vs peak players, scatterplot (Q1, the large left panel) ---------- */
 const S = {};
 function initScatter() {
   const svg = d3.select('#c2').append('svg').attr('role', 'group')
@@ -639,7 +689,7 @@ function initScatter() {
         { k: 'Released', v: d.y === null ? 'not recorded' : String(d.y) },
         { k: 'Developer', v: studioBy.get(d.s).label }
       ],
-      note: (d.y !== null && !inWindow(d) ? 'Outside the 2012–2024 range of chart 1. ' : '') + pinNote(state.game === d.id)
+      note: (d.y !== null && !inWindow(d) ? 'Outside the 2012–2024 range of chart 2. ' : '') + pinNote(state.game === d.id)
     })
   };
   wire(pts, cfg);
@@ -712,7 +762,7 @@ function renderScatter(F, e) {
     .attr('y', 0).attr('height', h).attr('fill', C.accent).attr('opacity', 0.08);
 
   const any = anyFocus(e), shown = d => state.tiers.has(d.t) && studioOK(d), lit = d => !any || inFocus(d, e);
-  S.catcher.attr('x', -8).attr('y', -8).attr('width', w + 16).attr('height', h + 16);
+  S.catcher.attr('x', -10).attr('y', -10).attr('width', w + m.r + 10).attr('height', h + 20);   // reaches the panel edge: nudged marks can sit just past the axis end
   S.sel.attr('transform', d => { const p = S.pos.get(d.id); return `translate(${p.x},${p.y})`; })
     .style('display', d => shown(d) ? null : 'none')
     .attr('aria-pressed', d => state.game === d.id ? 'true' : 'false')
@@ -738,6 +788,8 @@ function renderScatter(F, e) {
       t.append('tspan').attr('class', 'l2').attr('dy', '1.2em').text(w < 440 ? usd(d.p) : `${usd(d.p)} · ${tierBy.get(d.t).label}`);
     });
   const marks = F.filter(g => !named.includes(g)).map(g => S.pos.get(g.id)), taken = [];
+  const yt = S.titles.select('.ytitle').node();            // labels also keep clear of the y-axis title
+  if (yt) { const tb = yt.getBBox(); taken.push({ x0: tb.x - 2, x1: tb.x + tb.width + 4, y0: tb.y - 2, y1: tb.y + tb.height + 2 }); }
   labels.each(function (d) {
     const p0 = S.pos.get(d.id), th = 28;
     d3.select(this).attr('x', 0).attr('y', 0).attr('text-anchor', 'start').selectAll('tspan').attr('x', 0);
@@ -794,6 +846,7 @@ function initBands() {
   rows.append('rect').attr('class', 'hitrect').attr('fill', 'transparent');
   rows.append('text').attr('class', 'glabel').attr('text-anchor', 'end').attr('x', -12);
   rows.append('text').attr('class', 'gsub').attr('text-anchor', 'end').attr('x', -12).attr('font-size', 10.5).attr('fill', C.muted);
+  rows.append('text').attr('class', 'gyear').attr('text-anchor', 'end').attr('x', -12).attr('font-size', 10.5).style('fill', C.accent);
   const segs = rows.selectAll('g.sg').data(b => TIERS.map(t => ({ band: b.k, k: t.k }))).join('g').attr('class', 'sg');
   segs.append('rect').attr('class', 'seg-r').attr('rx', 2);
   segs.append('text').attr('class', 'seg').attr('dy', '0.35em').attr('text-anchor', 'middle').style('pointer-events', 'none');
@@ -838,15 +891,13 @@ function renderBands(F, e, animate) {
   B.rows.select('.hitrect').attr('x', -m.l).attr('width', W).attr('y', 0).attr('height', rowH);
   B.rows.select('.fr').attr('x', -m.l + 2).attr('width', W - 4).attr('y', 2).attr('height', rowH - 4);
   const yMid = rowH / 2;
-  B.rows.select('.glabel').attr('y', yMid - 3).attr('fill', C.ink)
+  B.rows.select('.glabel').attr('fill', C.ink)
     .attr('font-weight', d => state.band === d.k || e.band === d.k || (gm && gm.b === d.k) ? 700 : 500)
     .text(d => d.label === '$50+' ? '$50 and up' : d.label);
-  B.rows.select('.gsub').attr('y', yMid + 12).text(d => {
-    const s = stats.get(d.k);
-    let t = `${s.n} game${s.n === 1 ? '' : 's'}`;
-    if (e.year !== null) t += ` · ${F.filter(g => g.b === d.k && g.y === e.year).length} from ${e.year}`;
-    return t;
-  });
+  const yr = e.year !== null;
+  B.rows.select('.glabel').attr('y', yMid - (yr ? 9 : 3));
+  B.rows.select('.gsub').attr('y', yMid + (yr ? 6 : 12)).text(d => { const n = stats.get(d.k).n; return `${n} game${n === 1 ? '' : 's'}`; });
+  B.rows.select('.gyear').attr('y', yMid + 20).text(d => yr ? `${F.filter(g => g.b === d.k && g.y === e.year).length} from ${e.year}` : '');
   // segments, best tier first so its share starts at the common baseline
   B.rows.each(function (bd) {
     const s = stats.get(bd.k); let acc = 0;
@@ -902,7 +953,7 @@ function renderStatus(F) {
   if (key === statusKey) return;
   const first = statusKey === null; statusKey = key;
   const st = $('status'); st.replaceChildren(); st.classList.toggle('on', parts.length > 0);
-  if (!parts.length) st.textContent = `Showing all ${games.length} paid games. Point at or click a price band, a year or a game to link the three charts. Use the buttons above to filter.`;
+  if (!parts.length) st.textContent = `Showing all ${games.length} paid games.`;
   else {
     parts.forEach(([label, value]) => { const sp = el('span'); sp.appendChild(el('b', '', label + ': ')); sp.appendChild(document.createTextNode(value)); st.appendChild(sp); st.appendChild(document.createTextNode(' · ')); });
     st.appendChild(document.createTextNode('Press Esc or Reset to clear.'));
@@ -937,12 +988,46 @@ function render(dataChanged) {
   renderBands(F, e, dataChanged === true);
   renderStatus(F);
   if (dataChanged === true) renderTables(F);
+  if (alignHeaders()) { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => render()); }
+}
+// Panels side by side get headers of equal height (titles can wrap to different line counts), so the three
+// charts always start at the same height. Returns true when a height changed and the charts need redrawing.
+function alignHeaders() {
+  const heads = [...document.querySelectorAll('.grid > .panel > header')];
+  const before = heads.map(h => h.style.minHeight);
+  heads.forEach(h => { h.style.minHeight = ''; });
+  const rows = new Map();
+  heads.forEach(h => { const top = Math.round(h.getBoundingClientRect().top); (rows.get(top) || rows.set(top, []).get(top)).push(h); });
+  rows.forEach(group => {
+    if (group.length < 2) return;
+    const max = Math.max(...group.map(h => h.getBoundingClientRect().height));
+    group.forEach(h => { h.style.minHeight = max + 'px'; });
+  });
+  // When the right-hand panels are stacked in one column, all three headers share one height: the left chart and
+  // the top-right chart start level, and the two stacked charts come out exactly the same size.
+  const h2 = document.querySelector('#p2 > header'), h3 = document.querySelector('#p3 > header');
+  if (Math.round(h2.getBoundingClientRect().left) === Math.round(h3.getBoundingClientRect().left)) {
+    const max = Math.max(...heads.map(h => h.getBoundingClientRect().height));
+    heads.forEach(h => { h.style.minHeight = max + 'px'; });
+  }
+  return heads.some((h, i) => h.style.minHeight !== before[i]);
 }
 
+let raf = 0;
 initLegend(); initLine(); initScatter(); initBands();
 render(true);
-let raf = 0;
 new ResizeObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => render()); }).observe(document.querySelector('.grid'));
+// Fit the three charts to the window on laptop and desktop screens: the grid takes the height left below the
+// header (never less than 520px). Data tables open over their chart, so they never change this height.
+function fitGrid() {
+  const grid = document.querySelector('.grid');
+  if (window.innerWidth <= 1180) { grid.classList.remove('fit'); grid.style.height = ''; return; }
+  grid.classList.add('fit');
+  const top = grid.getBoundingClientRect().top + window.scrollY;
+  grid.style.height = Math.max(520, Math.floor(window.innerHeight - top - 14)) + 'px';
+}
+fitGrid();
+window.addEventListener('resize', fitGrid);
 
 // read-only hook used for checking the numbers on the page against the cleaned tables
 window.steamDash = {
