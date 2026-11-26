@@ -126,7 +126,14 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .hint,.tier .ct,.q,.desc,details.tbl summary{font-family:var(--mono)}
 .hint{font-size:11px}
 .q,.desc{font-size:11px}
-.desc{min-height:2.8em}
+/* Each chart's "how to read" line is a visual key, not a sentence. */
+.desc.key{display:flex;flex-wrap:wrap;align-items:center;gap:3px 16px;min-height:1.7em;margin:2px 0 0}
+.key > span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.key svg{display:block;flex:none}
+.key .kln{width:30px;height:12px}
+.key .ksh{width:13px;height:13px}
+.key .ksw{width:12px;height:12px}
+.key .ramp{display:inline-flex;gap:2px}
 .qn{font-family:var(--font)}
 
 </style>
@@ -137,7 +144,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
     <div class="titles">
       <h1 class="title"><span class="vh">Pay More, Get Less?</span><span class="tg"><svg viewBox="0 -810 1944 1000" style="width:1.944em" aria-hidden="true" focusable="false"><path d="M70 0H244V-280H494C649 -280 738 -367 738 -490C738 -615 649 -700 494 -700H70ZM405 -374H244V-606H415C513 -606 562 -564 562 -490C562 -418 513 -374 405 -374ZM999 10C1059 10 1120 -7 1168 -44V0H1334V-334C1334 -478 1204 -536 1064 -536C918 -536 790 -474 778 -354H948C959 -419 1005 -450 1066 -450C1124 -450 1165 -432 1165 -389C1165 -345 1118 -332 990 -325C876 -319 763 -294 763 -162C763 -48 858 10 999 10ZM1029 -75C970 -75 931 -105 931 -158C931 -209 960 -238 1030 -243C1082 -247 1137 -255 1168 -276V-155C1143 -111 1095 -75 1029 -75ZM1498 180H1628L1939 -526H1809L1680 -234L1538 -526H1362L1600 -51Z"/></svg><svg viewBox="0 -810 3048 1000" style="width:3.048em" aria-hidden="true" focusable="false"><path d="M70 -700V0H194V-515L372 0H572L749 -514V0H911V-700H690L489 -113L285 -700ZM1314 10C1495 10 1623 -96 1623 -263C1623 -422 1496 -536 1314 -536C1133 -536 1005 -422 1005 -263C1005 -95 1134 10 1314 10ZM1314 -76C1226 -76 1173 -154 1173 -263C1173 -373 1227 -450 1314 -450C1401 -450 1455 -373 1455 -263C1455 -153 1401 -76 1314 -76ZM1715 0H1881V-274C1900 -358 1969 -382 2023 -382C2049 -382 2074 -378 2094 -368V-532C2086 -534 2071 -536 2058 -536C1986 -536 1929 -489 1881 -426V-526H1715ZM2426 10C2578 10 2703 -70 2729 -196H2559C2546 -125 2503 -76 2426 -76C2333 -76 2282 -145 2277 -245H2730C2735 -439 2586 -536 2427 -536C2273 -536 2109 -445 2109 -263C2109 -96 2245 10 2426 10ZM2563 -331H2284C2300 -404 2350 -450 2426 -450C2508 -450 2555 -404 2563 -331ZM2831 105H2815V177H2831C2911 177 2993 147 2993 27V-168H2823V0H2896C2910 0 2918 7 2918 25C2918 67 2896 105 2831 105Z"/></svg></span><span class="tg"><svg viewBox="0 -810 1929 1000" style="width:1.929em" aria-hidden="true" focusable="false"><path d="M442 10C676 10 829 -122 829 -288V-369H419V-275H653V-268C653 -164 575 -84 442 -84C310 -84 216 -185 216 -350C216 -515 310 -616 442 -616C552 -616 628 -542 641 -434H821C797 -600 647 -710 442 -710C210 -710 40 -567 40 -350C40 -123 210 10 442 10ZM1220 10C1372 10 1497 -70 1523 -196H1353C1340 -125 1297 -76 1220 -76C1127 -76 1076 -145 1071 -245H1524C1529 -439 1380 -536 1221 -536C1067 -536 903 -445 903 -263C903 -96 1039 10 1220 10ZM1357 -331H1078C1094 -404 1144 -450 1220 -450C1302 -450 1349 -404 1357 -331ZM1749 0H1929V-86H1869C1819 -86 1801 -109 1801 -153V-440H1929V-526H1801V-670H1635V-526H1544V-440H1635V-114C1635 -37 1677 0 1749 0Z"/></svg><svg viewBox="0 -810 3232 1000" style="width:3.232em" aria-hidden="true" focusable="false"><path d="M244 -94V-700H70V0H655V-94ZM971 10C1123 10 1248 -70 1274 -196H1104C1091 -125 1048 -76 971 -76C878 -76 827 -145 822 -245H1275C1280 -439 1131 -536 972 -536C818 -536 654 -445 654 -263C654 -96 790 10 971 10ZM1108 -331H829C845 -404 895 -450 971 -450C1053 -450 1100 -404 1108 -331ZM1620 10C1788 10 1900 -51 1900 -160C1900 -263 1809 -302 1708 -306L1597 -310C1544 -312 1506 -335 1506 -380C1506 -429 1555 -450 1608 -450C1677 -450 1718 -410 1718 -354H1888C1879 -470 1745 -536 1608 -536C1448 -536 1338 -473 1338 -372C1338 -270 1427 -230 1524 -225L1649 -218C1700 -215 1732 -192 1732 -147C1732 -97 1688 -76 1624 -76C1548 -76 1505 -118 1505 -176H1335C1344 -56 1483 10 1620 10ZM2252 10C2420 10 2532 -51 2532 -160C2532 -263 2441 -302 2340 -306L2229 -310C2176 -312 2138 -335 2138 -380C2138 -429 2187 -450 2240 -450C2309 -450 2350 -410 2350 -354H2520C2511 -470 2377 -536 2240 -536C2080 -536 1970 -473 1970 -372C1970 -270 2059 -230 2156 -225L2281 -218C2332 -215 2364 -192 2364 -147C2364 -97 2320 -76 2256 -76C2180 -76 2137 -118 2137 -176H1967C1976 -56 2115 10 2252 10ZM2778 -255V-233H2950V-236C2950 -289 2992 -312 3049 -341C3134 -384 3187 -425 3187 -520C3187 -639 3054 -710 2885 -710C2687 -710 2574 -630 2557 -466H2733C2733 -560 2795 -616 2885 -616C2959 -616 3012 -579 3012 -530C3012 -481 2967 -457 2901 -424C2829 -388 2778 -347 2778 -255ZM2779 0H2949V-168H2779Z"/></svg></span></h1>
       <p class="hook">Steam game prices have doubled since 2012. But among the 142 most-owned paid games, the cheapest are the best-loved.</p>
-      <p class="sub">Read left to right: prices rose, players didn't follow, reviews went the other way. List prices in US$ · Crawlora, State of Steam 2026.</p>
+      <p class="sub">Dataset credits to Crawlora, State of Steam 2026</p>
     </div>
     <div class="features" role="group" aria-label="Filters">
       <div class="legend">
@@ -160,7 +167,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       <header>
         <p class="q"><span class="qn">Q1</span>Are paid games getting pricier?</p>
         <h2 id="t1"></h2>
-        <p class="desc" id="d1"></p>
+        <p class="desc key" id="d1" aria-label="Key: median, solid line with circles; mean, dashed line with squares."><span><svg class="kln" viewBox="0 0 30 12" aria-hidden="true"><line x1="1" y1="6" x2="29" y2="6" stroke="#111827" stroke-width="2.5" stroke-linecap="round"/><circle cx="15" cy="6" r="3.8" fill="#111827" stroke="#fff" stroke-width="1.2"/></svg>Median</span><span><svg class="kln" viewBox="0 0 30 12" aria-hidden="true"><line x1="1" y1="6" x2="29" y2="6" stroke="#111827" stroke-width="2" stroke-dasharray="5 3.5"/><rect x="11.5" y="2.5" width="7" height="7" fill="#fff" stroke="#111827" stroke-width="1.75"/></svg>Mean</span></p>
         <p class="selnote" id="s1"></p>
       </header>
       <div class="chart" id="c1"></div>
@@ -171,7 +178,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       <header>
         <p class="q"><span class="qn">Q2</span>Do pricier games have more players?</p>
         <h2 id="t2"></h2>
-        <p class="desc" id="d2"></p>
+        <p class="desc key" id="d2" aria-label="Key: circle, indie; triangle, non-indie; darker colour, better reviewed."><span><svg class="ksh" viewBox="-7 -7 14 14" aria-hidden="true"><circle r="4.6" fill="#4b5563"/></svg>Indie</span><span><svg class="ksh" viewBox="-7 -7 14 14" aria-hidden="true"><path d="M0,-6.1L5.3,3.05L-5.3,3.05Z" fill="#4b5563"/></svg>Non-indie</span><span><span class="ramp"><svg class="ksw" viewBox="0 0 12 12" aria-hidden="true"><rect x="0.5" y="0.5" width="11" height="11" rx="2" fill="#061b4d"/></svg><svg class="ksw" viewBox="0 0 12 12" aria-hidden="true"><rect x="0.5" y="0.5" width="11" height="11" rx="2" fill="#1c407a"/></svg><svg class="ksw" viewBox="0 0 12 12" aria-hidden="true"><rect x="0.5" y="0.5" width="11" height="11" rx="2" fill="#2f6aab"/></svg><svg class="ksw" viewBox="0 0 12 12" aria-hidden="true"><rect x="0.5" y="0.5" width="11" height="11" rx="2" fill="#4396de"/></svg></span>Darker = better reviewed</span></p>
         <p class="selnote" id="s2"></p>
       </header>
       <div class="chart" id="c2"></div>
@@ -182,7 +189,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       <header>
         <p class="q"><span class="qn">Q3</span>Do pricier games get better reviews?</p>
         <h2 id="t3"></h2>
-        <p class="desc" id="d3"></p>
+        <p class="desc key" id="d3" aria-label="Key: darkest segment, Overwhelmingly Positive; lighter segments, lower tiers."><span><svg class="ksw" viewBox="0 0 12 12" aria-hidden="true"><rect x="0.5" y="0.5" width="11" height="11" rx="2" fill="#061b4d"/></svg>Overwhelmingly Positive</span><span><span class="ramp"><svg class="ksw" viewBox="0 0 12 12" aria-hidden="true"><rect x="0.5" y="0.5" width="11" height="11" rx="2" fill="#1c407a"/></svg><svg class="ksw" viewBox="0 0 12 12" aria-hidden="true"><rect x="0.5" y="0.5" width="11" height="11" rx="2" fill="#2f6aab"/></svg><svg class="ksw" viewBox="0 0 12 12" aria-hidden="true"><rect x="0.5" y="0.5" width="11" height="11" rx="2" fill="#4396de"/></svg></span>Lower tiers</span></p>
         <p class="selnote" id="s3"></p>
       </header>
       <div class="chart" id="c3"></div>
@@ -203,6 +210,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
         <li><b>Point at</b> a year, a game or a price band to highlight the matching games in the other charts.</li>
         <li><b>Click</b> it (or press Enter or Space) to keep the selection. Click again or press Esc to clear.</li>
         <li><b>Keyboard:</b> Tab moves between charts, arrow keys move between marks inside a chart.</li>
+        <li><b>r</b> in chart 2 is Pearson’s correlation between price and (log) peak players: 0 means no link, 1 a perfect one.</li>
         <li><b>Review tier and Developer buttons</b> filter every chart: the lines, dots, correlation and review shares are recalculated. A hidden review tier turns hollow in chart 3. Axes stay fixed so the charts can be compared before and after.</li>
       </ul>
     </div>
@@ -589,7 +597,6 @@ function renderLine(F, e) {
       : `Median list price ${verb}, from ${usd(a.median)} in ${a.year} to ${usd(b.median)} in ${b.year}`;
   }
   $('t1').textContent = title;
-  $('d1').textContent = 'Median (solid line, circles) and mean (dashed line, squares) list price of paid games by release year.';
   const note = [];
   if (bd) note.push(`Orange: the ${bandGames.length} games priced ${bd.label === '$50+' ? '$50 and up' : bd.label.replace('Under', 'under')}.`);
   if (e.year !== null) note.push(`Shaded: ${e.year}.`);
@@ -762,7 +769,6 @@ function renderScatter(F, e) {
     title += ` (r = ${r.toFixed(2)})`;
   }
   $('t2').textContent = title;
-  $('d2').textContent = `${F.length} paid games. Circle = indie, triangle = non-indie, colour = review tier. r = Pearson’s correlation of price and log players.`;
   const note = [];
   if (any) {
     const pool = F.filter(g => inFocus(g, e)), rs = pearson(pool);
@@ -872,7 +878,6 @@ function renderBands(F, e, animate) {
       : `${pct(pa)} of games are Overwhelmingly Positive both ${BAND_PHRASE[a.k]} and ${BAND_PHRASE[z.k]}`;
   } else if (have.length === 1) title = `${pct(have[0].share(4))} of games ${BAND_PHRASE[have[0].k]} are Overwhelmingly Positive`;
   $('t3').textContent = title;
-  $('d3').textContent = 'Review tiers of each price band’s games. The darkest part starts at 0, so its length is the share rated Overwhelmingly Positive.';
   const note = [];
   if (state.studios.size < STUDIOS.length) note.push(`${STUDIOS.filter(s => state.studios.has(s.k)).map(s => s.label).join(', ')} games only.`);
   if (state.tiers.size < 4) note.push('Hollow: hidden tiers.');
